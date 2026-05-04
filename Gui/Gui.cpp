@@ -122,6 +122,7 @@ void Gui()
     static ID3D11ShaderResourceView* clock = LoadTexture("Assets/Window/clock.png", g_pd3dDevice);
     static ID3D11ShaderResourceView* BigNote = LoadTexture("Assets/Window/music(2).png", g_pd3dDevice);
     static ID3D11ShaderResourceView* inbox = LoadTexture("Assets/Window/inbox.png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* search = LoadTexture("Assets/Window/search-interface-symbol(1).png", g_pd3dDevice);
 
     // Main Window loop
     bool done = false;
@@ -406,8 +407,87 @@ void Gui()
                 
                 else if (Tabsystem == 1)
                 {
-                    SetCursorPos(ImVec2(400.0f,500.0f));
-                    Text("HELLO TEST");
+                    SetCursorPos(ImVec2(255.0f, 70.0f));
+                    PushFont(NULL, 22.0f);
+
+                    Text("Library");
+
+                    PopFont();
+
+                    SetCursorPos(ImVec2(265.0f, 120.0f));
+
+                    if(Button("Songs", ImVec2(53.0f, 20.0f)))
+                    {
+
+                    }
+
+                    SameLine(0.0f, 15.0f);
+
+                    if(Button("Albums", ImVec2(55.0f, 23.0f)))
+                    {
+
+                    }
+
+                    SameLine(0.0f, 15.0f);
+
+                    if(Button("Foldiers", ImVec2(57.0f, 25.0f)))
+                    {
+
+                    }
+
+                    SameLine(0.0f, 500.0f);
+
+                    // Making a search box because ImGui is g** and it doesnt have one and expects me to make one 
+                    
+                    SetNextItemWidth(200.0f);
+                    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20.0f, 8.0f));
+                    PushStyleColor(ImGuiCol_Text, ImVec4(0.6, 0.6, 0.6, 1.0f));
+                    PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.13f, 0.13f, 0.13f, 1.0f));
+                    
+                    InputText("          ", HoldSearch, sizeof(HoldSearch));
+
+                    const char* items[] = {/* Add later the function with the names in order to actually search */};
+                    
+                    for (const char* item : items) {
+                        if (strstr(item, HoldSearch) != nullptr) { // Check if we have what the user is searching maybe add later a function with algorithm that can see lowercase and upercase
+                            Text("%s", item); // Very simple logic of finding the item 
+                        }
+                    }
+
+                    
+                    PopStyleVar();
+
+                    SetCursorPos(ImVec2(970.0f, 128.0f));
+                    Image((ImTextureID)search, ImVec2(16.0f, 16.0f));
+
+                    SetCursorPos(ImVec2(1000.0f, 128.0f));
+                    PushStyleColor(ImGuiCol_Text, ImVec4(0.6, 0.6, 0.6, 1.0f));
+
+                    Text("Search library...");
+
+                    PopStyleColor(3);
+
+                    // Put this to an else statement after i make the find music statement later
+                    SetCursorPos(ImVec2(690.0f, 300.0f));
+                    Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
+
+                    SetCursorPos(ImVec2(600.0f, 400.0f));
+                    PushFont(NULL, 28.0f); // Next put it 16
+
+                    Text("Your library is empty");
+
+                    PopFont();
+                    
+                    SetCursorPos(ImVec2(600.0f, 440.0f));
+                    PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                    PushFont(NULL, 18.5f);
+
+                    Text("Add some songs to your library\n             to get started.");
+                    
+                    PopStyleColor();
+                    PopFont();
+
+                    // Here is the end of the else statement
                 }
                 
                 else if (Tabsystem == 2)
