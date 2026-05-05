@@ -418,54 +418,49 @@ void Gui()
 
                     if(Button("Songs", ImVec2(53.0f, 20.0f)))
                     {
-
+                        LibraryTabSystem = 0;
                     }
 
                     SameLine(0.0f, 15.0f);
 
                     if(Button("Albums", ImVec2(55.0f, 23.0f)))
                     {
-
+                        LibraryTabSystem = 1;
                     }
 
                     SameLine(0.0f, 15.0f);
 
                     if(Button("Foldiers", ImVec2(57.0f, 25.0f)))
                     {
-
+                        LibraryTabSystem = 2;
                     }
 
                     SameLine(0.0f, 500.0f);
-
-                    // Making a search box because ImGui is g** and it doesnt have one and expects me to make one 
                     
+                    // Making a search box because ImGui is g** and it doesnt have one and expects me to make one
+                   
                     SetNextItemWidth(200.0f);
-                    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(20.0f, 8.0f));
+                    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(30.0f, 8.0f));
                     PushStyleColor(ImGuiCol_Text, ImVec4(0.6, 0.6, 0.6, 1.0f));
                     PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.13f, 0.13f, 0.13f, 1.0f));
-                    
-                    InputText("          ", HoldSearch, sizeof(HoldSearch));
-
+                   
+                    InputTextWithHint("        ", "Search library...", HoldSearch, sizeof(HoldSearch));
                     const char* items[] = {/* Add later the function with the names in order to actually search */};
-                    
+                   
                     for (const char* item : items) {
                         if (strstr(item, HoldSearch) != nullptr) { // Check if we have what the user is searching maybe add later a function with algorithm that can see lowercase and upercase
-                            Text("%s", item); // Very simple logic of finding the item 
+                            Text("%s", item); // Very simple logic of finding the item
                         }
                     }
-
                     
-                    PopStyleVar();
-
                     SetCursorPos(ImVec2(970.0f, 128.0f));
                     Image((ImTextureID)search, ImVec2(16.0f, 16.0f));
+                    
+                    PopStyleVar();
+                    PopStyleColor(2);
 
-                    SetCursorPos(ImVec2(1000.0f, 128.0f));
-                    PushStyleColor(ImGuiCol_Text, ImVec4(0.6, 0.6, 0.6, 1.0f));
-
-                    Text("Search library...");
-
-                    PopStyleColor(3);
+                    GetWindowDrawList()->AddLine(ImVec2(p.x + 260.0f, p.y + -100.0f), ImVec2(p.x + 1150.0f, p.y + -100.0f), // first x is for left right second x is for length first and second y are for rotating
+                    GetColorU32(ImGuiCol_Separator), 1.0f);
 
                     // Put this to an else statement after i make the find music statement later
                     SetCursorPos(ImVec2(690.0f, 300.0f));
@@ -488,6 +483,24 @@ void Gui()
                     PopFont();
 
                     // Here is the end of the else statement
+
+                    
+
+                    if (LibraryTabSystem == 0)
+                    {
+                        Text("This is songs tab");
+                    }
+
+                    else if (LibraryTabSystem == 1)
+                    {
+                        Text("this is album tab");
+                    }
+
+                    else if (LibraryTabSystem == 2)
+                    {
+                        Text("this is foldiers tab");
+                    }
+
                 }
                 
                 else if (Tabsystem == 2)
