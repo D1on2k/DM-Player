@@ -178,8 +178,10 @@ void Gui()
             // Top Menu
             BeginGroup();
             {
+                ImVec2 windowSize = GetWindowSize();
+                
                 // Add the close big and minimize button
-                SetCursorPos(ImVec2(1080.0f, 0.0f));
+                SetCursorPos(ImVec2(windowSize.x - 120.0f, 0.0f));
                 
                 PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
                 PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
@@ -190,12 +192,12 @@ void Gui()
                     ShowWindow(hwnd, SW_MINIMIZE);
                 }
                 
-                SetCursorPos(ImVec2(1083.5f, -2.0f));
+                SetCursorPos(ImVec2(windowSize.x - 120.0f, 0.0f));
                 Image((ImTextureID)minimizebutton, ImVec2(32.0f, 32.0f));
 
                 PopStyleColor(3);
 
-                SetCursorPos(ImVec2(1120.0f, 0.0f));
+                SetCursorPos(ImVec2(windowSize.x - 80.0f, 0.0f));
                 
                 PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
                 PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
@@ -203,15 +205,15 @@ void Gui()
 
                 if (Button("  ", ImVec2(38.5f, 37.8f)))
                 {
-                    ShowWindow(hwnd, SW_MAXIMIZE);
+                    ToggleMaximize(hwnd); // because ShowWindow(hwnd, SW_MAXIMIZE); did not work
                 }
                 
                 PopStyleColor(3);
 
-                SetCursorPos(ImVec2(1130.5f, 12.0f));
+                SetCursorPos(ImVec2(windowSize.x - 70.0f, 13.0f));
                 Image((ImTextureID)bigbutton, ImVec2(16.0f, 16.0f));
 
-                SetCursorPos(ImVec2(1160.0f, 0.0f));
+                SetCursorPos(ImVec2(windowSize.x - 40.0f, 0.0f));
                 
                 PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
                 PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
@@ -219,10 +221,10 @@ void Gui()
 
                 if (Button("   ", ImVec2(38.5f, 37.8f)))
                 {
-                    abort();
+                    PostQuitMessage(0); // was a bit too rushed abort();
                 }
                 
-                SetCursorPos(ImVec2(1160.0f, 3.0f));
+                SetCursorPos(ImVec2(windowSize.x - 40.0f, 3.8f));
                 Image((ImTextureID)closebutton, ImVec2(32.0f, 32.0f));
 
                 PopStyleColor(3);
@@ -241,6 +243,10 @@ void Gui()
             // Top Right Menu With Tab System in it
             BeginGroup();
             {  
+                ImVec2 windowSize = GetWindowSize(); 
+                float scale_x = windowSize.x / 1200.0f; 
+                float scale_y = windowSize.y / 800.0f;
+
                 PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
                 PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
                 PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
@@ -304,10 +310,9 @@ void Gui()
 
                 if (Tabsystem == 0) 
                 {   
-                    ImVec2 p = GetCursorScreenPos();
+                    
                     
                     // Checking and displaying if we find the image 
-
                     if (takepath != "")
                     {
                         SetCursorPos(ImVec2(255.0f, 155.0f));
@@ -317,19 +322,19 @@ void Gui()
 
                     else
                     {
-                        SetCursorPos(ImVec2(690.0f, 100.0f));
+                        SetCursorPos(ImVec2(690.0f * scale_x, 100.0f * scale_y));
                         Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
                         
-                        SetCursorPos(ImVec2(690.0f, 500.0f));
+                        SetCursorPos(ImVec2(690.0f * scale_x, 500.0f * scale_y));
                         Image((ImTextureID)inbox, ImVec2(64.0f, 64.0f));
 
-                        SetCursorPos(ImVec2(630.0f, 180.0f));
+                        SetCursorPos(ImVec2(630.0f * scale_x, 180.0f * scale_y));
                         
                         PushFont(NULL, 28.0f);
                         
                         Text("No song playing");
     
-                        SetCursorPos(ImVec2(620.0f, 220.0f));
+                        SetCursorPos(ImVec2(620.0f * scale_x, 220.0f * scale_y));
                         
                         PushFont(NULL, 16.0f);
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
@@ -338,13 +343,13 @@ void Gui()
 
                         PopStyleColor();
 
-                        SetCursorPos(ImVec2(650.0f, 580.0f));
+                        SetCursorPos(ImVec2(650.0f * scale_x, 580.0f * scale_y));
 
                         PushFont(NULL, 18.0f);
 
                         Text("Your playlist is empty.");
 
-                        SetCursorPos(ImVec2(630.0f, 610.0f));
+                        SetCursorPos(ImVec2(630.0f * scale_x, 610.0f * scale_y));
 
                         PushFont(NULL, 16.0f);
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
@@ -358,10 +363,10 @@ void Gui()
                         PopFont();
                     }
 
-                    GetWindowDrawList()->AddLine(ImVec2(p.x + 223.0f, p.y + 80.0f), ImVec2(p.x + 1200.0f, p.y + 80.0f), 
+                    GetWindowDrawList()->AddLine(ImVec2(p.x + 223.0f, p.y + 80.0f), ImVec2(p.x + 3500.0f, p.y + 80.0f), 
                     GetColorU32(ImGuiCol_Separator), 1.0f);
                     
-                    GetWindowDrawList()->AddLine(ImVec2(p.x + 223.0f, p.y + 130.0f), ImVec2(p.x + 1200.0f, p.y + 130.0f), 
+                    GetWindowDrawList()->AddLine(ImVec2(p.x + 223.0f, p.y + 130.0f), ImVec2(p.x + 3500.0f, p.y + 130.0f), 
                     GetColorU32(ImGuiCol_Separator), 1.0f);
 
                     SetCursorPos(ImVec2(255.0f, 355.0f));
@@ -373,21 +378,21 @@ void Gui()
                     }
                     PopFont();
 
-                    SameLine(0.0f, 50.0f);
+                    SameLine(0.0f, 50.0f * scale_x);
 
                     if (Button("Title", ImVec2(50.0f, 20.0f)))
                     {
 
                     }
 
-                    SameLine(0.0f, 150.0f);
+                    SameLine(0.0f, 150.0f * scale_x);
 
                     if (Button("Artist", ImVec2(52.0f, 20.0f)))
                     {
 
                     }
 
-                    SameLine(0.0f, 200.0f);
+                    SameLine(0.0f, 200.0f * scale_x);
 
                     if (Button("Album", ImVec2(50.0f, 20.0f)))
                     {
@@ -401,7 +406,7 @@ void Gui()
                         
                     }
 
-                    SetCursorPos(ImVec2(1057.2f, 356.8f));
+                    SetCursorPos(ImVec2(1057.2f * scale_x, 356.8f * scale_y));
                     Image((ImTextureID)clock, ImVec2(16.0f, 16.0f));
                 }
                 
@@ -459,47 +464,98 @@ void Gui()
                     PopStyleVar();
                     PopStyleColor(2);
 
-                    GetWindowDrawList()->AddLine(ImVec2(p.x + 260.0f, p.y + -100.0f), ImVec2(p.x + 1150.0f, p.y + -100.0f), // first x is for left right second x is for length first and second y are for rotating
+                    GetWindowDrawList()->AddLine(ImVec2(p.x + 260.0f, p.y + -100.0f), ImVec2(p.x + 1550.0f, p.y + -100.0f), // first x is for left right second x is for length first and second y are for rotating
                     GetColorU32(ImGuiCol_Separator), 1.0f);
-
-                    // Put this to an else statement after i make the find music statement later
-                    SetCursorPos(ImVec2(690.0f, 300.0f));
-                    Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
-
-                    SetCursorPos(ImVec2(600.0f, 400.0f));
-                    PushFont(NULL, 28.0f); // Next put it 16
-
-                    Text("Your library is empty");
-
-                    PopFont();
-                    
-                    SetCursorPos(ImVec2(600.0f, 440.0f));
-                    PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
-                    PushFont(NULL, 18.5f);
-
-                    Text("Add some songs to your library\n             to get started.");
-                    
-                    PopStyleColor();
-                    PopFont();
-
-                    // Here is the end of the else statement
-
-                    
 
                     if (LibraryTabSystem == 0)
                     {
-                        Text("This is songs tab");
+                        // Put this to an else statement after i make the find music statement later
+                        SetCursorPos(ImVec2(690.0f, 300.0f));
+                        Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
+
+                        SetCursorPos(ImVec2(600.0f, 400.0f));
+                        PushFont(NULL, 28.0f); // Next put it 16
+
+                        Text("You have no songs");
+
+                        PopFont();
+                        
+                        SetCursorPos(ImVec2(600.0f, 440.0f));
+                        PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                        PushFont(NULL, 18.5f);
+
+                        Text("Add some songs to your library\n             to get started.");
+                        
+                        PopStyleColor();
+                        PopFont();
+
+                        // Here is the end of the else statement
                     }
 
                     else if (LibraryTabSystem == 1)
                     {
-                        Text("this is album tab");
+                        // Put this to an else statement after i make the find music statement later
+                        SetCursorPos(ImVec2(690.0f, 300.0f));
+                        Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
+
+                        SetCursorPos(ImVec2(600.0f, 400.0f));
+                        PushFont(NULL, 28.0f); // Next put it 16
+
+                        Text("You have no albums");
+
+                        PopFont();
+                        
+                        SetCursorPos(ImVec2(600.0f, 440.0f));
+                        PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                        PushFont(NULL, 18.5f);
+
+                        Text("Add some songs to your library\n             to get started.");
+                        
+                        PopStyleColor();
+                        PopFont();
+
+                        // Here is the end of the else statement
                     }
 
                     else if (LibraryTabSystem == 2)
                     {
-                        Text("this is foldiers tab");
-                    }
+                        // Put this to an else statement after i make the find music statement later
+                        SetCursorPos(ImVec2(690.0f, 300.0f));
+                        Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
+
+                        SetCursorPos(ImVec2(580.0f, 400.0f));
+                        PushFont(NULL, 28.0f); // Next put it 16
+
+                        Text("You haven't selected a folder");
+
+                        PopFont();
+                        
+                        SetCursorPos(ImVec2(590.0f, 440.0f));
+                        PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                        PushFont(NULL, 18.5f);
+
+                        Text("Go to settings and select a folder to start.");
+                        
+                        PopStyleColor();
+                        PopFont();
+
+                        PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                        PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                        PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+                        PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
+                        
+                        SetCursorPos(ImVec2(690.0f, 470.0f));
+
+                        if (Button(" Settings ", ImVec2(70.0f, 50.0f)))
+                        {
+                            Tabsystem = 4;
+                        }
+
+                        PopStyleColor(3);
+                        PopStyleVar();
+
+                        // Here is the end of the else statement
+                        }
 
                 }
                 
@@ -705,6 +761,32 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
 
     return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+}
+
+void ToggleMaximize(HWND hwnd)
+{
+    if (g_IsMaximized)
+    {
+        // Restore
+        SetWindowPos(hwnd, nullptr, g_NormalRect.left, g_NormalRect.top, g_NormalRect.right - g_NormalRect.left, g_NormalRect.bottom - g_NormalRect.top, SWP_NOZORDER | SWP_NOACTIVATE);
+            
+        MakeTheWindowRound(hwnd, 30);
+        g_IsMaximized = false;
+    }
+    else
+    {
+        // Save current position and size
+        GetWindowRect(hwnd, &g_NormalRect);
+        
+        // Get screen work area (without taskbar)
+        MONITORINFO mi = { sizeof(MONITORINFO) };
+        GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi);
+        
+        SetWindowPos(hwnd, nullptr, mi.rcWork.left, mi.rcWork.top, mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top, SWP_NOZORDER | SWP_NOACTIVATE);
+            
+        MakeTheWindowRound(hwnd, 0);
+        g_IsMaximized = true;
+    }
 }
 
 int main()
