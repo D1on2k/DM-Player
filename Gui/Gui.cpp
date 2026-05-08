@@ -244,11 +244,13 @@ void Gui()
             BeginGroup();
             {  
                 ImVec2 windowSize = GetWindowSize(); 
+
                 float scale_x = windowSize.x / 1200.0f; 
-                float scale_y = windowSize.y / 800.0f;
+                float scale_xyzx = windowSize.x / 1138.5f;
                 float scale_xy = windowSize.x / 770.0f;
-                float scale_xyz = windowSize.x / 1137.0f;
-                float scale_xyzx = windowSize.x / 1260.0f;
+                
+                float scale_y = windowSize.y / 800.0f;
+                float scale_xyz = windowSize.y / 750.0f;
 
                 PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
                 PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
@@ -402,15 +404,17 @@ void Gui()
 
                     }
                     
+                    // Another band aid 
                     if (g_IsMaximized == false)
                     {
                         SameLine(0.0f, 350.0f * scale_x);
                     }
-
+                    
                     else
                     {
                         SameLine(0.0f, 350.0f * scale_xy);
                     }
+                    
 
                     if (Button("Duration", ImVec2(80.0f, 20.0f)))
                     {
@@ -459,6 +463,7 @@ void Gui()
                         LibraryTabSystem = 2;
                     }
 
+                    // Band ade code till i find a solution to how to fix this 
                     if (g_IsMaximized == false)
                     {
                         SameLine(0.0f, 500.0f);
@@ -492,9 +497,9 @@ void Gui()
                     
                     else
                     {
-                        SetCursorPos(ImVec2(970.0f * scale_xyz, 128.0f));
+                        SetCursorPos(ImVec2(970.0f * scale_xyzx, 128.0f));
                     }
-                    
+
                     Image((ImTextureID)search, ImVec2(16.0f, 16.0f));
                     
                     PopStyleVar();
@@ -506,26 +511,21 @@ void Gui()
                     if (LibraryTabSystem == 0)
                     {
                         // Put this to an else statement after i make the find music statement later
-                        if (g_IsMaximized == false)
-                        {
-                            SetCursorPos(ImVec2(690.0f, 300.0f));
-                        }
-                        
-                        else
-                        {
-                            SetCursorPos(ImVec2(650.0f * scale_x, 320.0f * scale_y));
-                        }
+
+                        // SetCursorPos(ImVec2(690.0f, 300.0f));
+
+                        SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
                         
                         Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
 
-                        SetCursorPos(ImVec2(600.0f * scale_x, 400.0f * scale_y));
+                        SetCursorPos(ImVec2(690.0f * scale_x, 400.0f * scale_y));
                         PushFont(NULL, 28.0f); // Next put it 16
 
                         Text("You have no songs");
 
                         PopFont();
                         
-                        SetCursorPos(ImVec2(590.0f * scale_x, 440.0f * scale_y));
+                        SetCursorPos(ImVec2(685.0f * scale_x, 440.0f * scale_y));
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
                         PushFont(NULL, 18.5f);
 
@@ -540,17 +540,17 @@ void Gui()
                     else if (LibraryTabSystem == 1)
                     {
                         // Put this to an else statement after i make the find music statement later
-                        SetCursorPos(ImVec2(690.0f * scale_xyzx, 300.0f * scale_y));
+                        SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
                         Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
 
-                        SetCursorPos(ImVec2(600.0f * scale_x, 400.0f * scale_y));
+                        SetCursorPos(ImVec2(690.0f * scale_x, 400.0f * scale_y));
                         PushFont(NULL, 28.0f); // Next put it 16
 
                         Text("You have no albums");
 
                         PopFont();
                         
-                        SetCursorPos(ImVec2(600.0f * scale_x, 440.0f * scale_y));
+                        SetCursorPos(ImVec2(685.0f * scale_x, 440.0f * scale_y));
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
                         PushFont(NULL, 18.5f);
 
@@ -565,17 +565,17 @@ void Gui()
                     else if (LibraryTabSystem == 2)
                     {
                         // Put this to an else statement after i make the find music statement later
-                        SetCursorPos(ImVec2(690.0f, 300.0f));
+                        SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
                         Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
 
-                        SetCursorPos(ImVec2(580.0f, 400.0f));
+                        SetCursorPos(ImVec2(675.0f * scale_x, 400.0f * scale_y));
                         PushFont(NULL, 28.0f); // Next put it 16
 
                         Text("You haven't selected a folder");
 
                         PopFont();
                         
-                        SetCursorPos(ImVec2(590.0f, 440.0f));
+                        SetCursorPos(ImVec2(680.0f * scale_x, 440.0f * scale_y));
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
                         PushFont(NULL, 18.5f);
 
@@ -589,7 +589,7 @@ void Gui()
                         PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
                         PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
                         
-                        SetCursorPos(ImVec2(690.0f, 470.0f));
+                        SetCursorPos(ImVec2(710.0f * scale_xyzx, 470.0f * scale_y));
 
                         if (Button(" Settings ", ImVec2(70.0f, 50.0f)))
                         {
