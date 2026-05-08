@@ -17,5 +17,9 @@ currently on the front end stage with a little bit of the backend in this state 
 
 ---
 
+## Contributing
+
+> PR Requests are available and I would be very happy to get some help by the community.
+
 ## BIG THANKS TO:
 Freepik Hirschwolf JessiGue Ranah Becris Pixel Studio Those Icons Kiranshastry and Catalin Fertu from www.flaticon.com the icons were made by them.
