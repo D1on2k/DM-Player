@@ -246,6 +246,9 @@ void Gui()
                 ImVec2 windowSize = GetWindowSize(); 
                 float scale_x = windowSize.x / 1200.0f; 
                 float scale_y = windowSize.y / 800.0f;
+                float scale_xy = windowSize.x / 770.0f;
+                float scale_xyz = windowSize.x / 1137.0f;
+                float scale_xyzx = windowSize.x / 1260.0f;
 
                 PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
                 PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
@@ -328,13 +331,13 @@ void Gui()
                         SetCursorPos(ImVec2(690.0f * scale_x, 500.0f * scale_y));
                         Image((ImTextureID)inbox, ImVec2(64.0f, 64.0f));
 
-                        SetCursorPos(ImVec2(630.0f * scale_x, 180.0f * scale_y));
+                        SetCursorPos(ImVec2(650.0f * scale_x, 180.0f * scale_y));
                         
                         PushFont(NULL, 28.0f);
                         
                         Text("No song playing");
     
-                        SetCursorPos(ImVec2(620.0f * scale_x, 220.0f * scale_y));
+                        SetCursorPos(ImVec2(640.0f * scale_x, 220.0f * scale_y));
                         
                         PushFont(NULL, 16.0f);
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
@@ -343,13 +346,13 @@ void Gui()
 
                         PopStyleColor();
 
-                        SetCursorPos(ImVec2(650.0f * scale_x, 580.0f * scale_y));
+                        SetCursorPos(ImVec2(660.0f * scale_x, 580.0f * scale_y));
 
                         PushFont(NULL, 18.0f);
 
                         Text("Your playlist is empty.");
 
-                        SetCursorPos(ImVec2(630.0f * scale_x, 610.0f * scale_y));
+                        SetCursorPos(ImVec2(650.0f * scale_x, 610.0f * scale_y));
 
                         PushFont(NULL, 16.0f);
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
@@ -378,35 +381,51 @@ void Gui()
                     }
                     PopFont();
 
-                    SameLine(0.0f, 50.0f * scale_x);
+                    SameLine(0.0f, 30.0f * scale_x);
 
                     if (Button("Title", ImVec2(50.0f, 20.0f)))
                     {
 
                     }
 
-                    SameLine(0.0f, 150.0f * scale_x);
+                    SameLine(0.0f, 120.0f * scale_x);
 
                     if (Button("Artist", ImVec2(52.0f, 20.0f)))
                     {
 
                     }
 
-                    SameLine(0.0f, 200.0f * scale_x);
+                    SameLine(0.0f, 180.0f * scale_x);
 
                     if (Button("Album", ImVec2(50.0f, 20.0f)))
                     {
 
                     }
+                    
+                    if (g_IsMaximized == false)
+                    {
+                        SameLine(0.0f, 350.0f * scale_x);
+                    }
 
-                    SameLine(0.0f, 250.0f);
+                    else
+                    {
+                        SameLine(0.0f, 350.0f * scale_xy);
+                    }
 
                     if (Button("Duration", ImVec2(80.0f, 20.0f)))
                     {
                         
                     }
-
-                    SetCursorPos(ImVec2(1057.2f * scale_x, 356.8f * scale_y));
+                    if (g_IsMaximized == false)
+                    {
+                        SetCursorPos(ImVec2(1090.0f * scale_x, 356.8f));
+                    }
+                    
+                    else 
+                    {
+                        SetCursorPos(ImVec2(1130.0f * scale_x, 356.8f));
+                    }
+                    
                     Image((ImTextureID)clock, ImVec2(16.0f, 16.0f));
                 }
                 
@@ -440,7 +459,15 @@ void Gui()
                         LibraryTabSystem = 2;
                     }
 
-                    SameLine(0.0f, 500.0f);
+                    if (g_IsMaximized == false)
+                    {
+                        SameLine(0.0f, 500.0f);
+                    }
+                    
+                    else
+                    {
+                        SameLine(0.0f, 1170.0f);
+                    }
                     
                     // Making a search box because ImGui is g** and it doesnt have one and expects me to make one
                    
@@ -458,29 +485,47 @@ void Gui()
                         }
                     }
                     
-                    SetCursorPos(ImVec2(970.0f, 128.0f));
+                    if (g_IsMaximized == false)
+                    {
+                        SetCursorPos(ImVec2(970.0f, 128.0f));
+                    }
+                    
+                    else
+                    {
+                        SetCursorPos(ImVec2(970.0f * scale_xyz, 128.0f));
+                    }
+                    
                     Image((ImTextureID)search, ImVec2(16.0f, 16.0f));
                     
                     PopStyleVar();
                     PopStyleColor(2);
 
-                    GetWindowDrawList()->AddLine(ImVec2(p.x + 260.0f, p.y + -100.0f), ImVec2(p.x + 1550.0f, p.y + -100.0f), // first x is for left right second x is for length first and second y are for rotating
+                    GetWindowDrawList()->AddLine(ImVec2(p.x + 260.0f, p.y + -100.0f), ImVec2(p.x + 1820.0f, p.y + -100.0f), // first x is for left right second x is for length first and second y are for rotating
                     GetColorU32(ImGuiCol_Separator), 1.0f);
 
                     if (LibraryTabSystem == 0)
                     {
                         // Put this to an else statement after i make the find music statement later
-                        SetCursorPos(ImVec2(690.0f, 300.0f));
+                        if (g_IsMaximized == false)
+                        {
+                            SetCursorPos(ImVec2(690.0f, 300.0f));
+                        }
+                        
+                        else
+                        {
+                            SetCursorPos(ImVec2(650.0f * scale_x, 320.0f * scale_y));
+                        }
+                        
                         Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
 
-                        SetCursorPos(ImVec2(600.0f, 400.0f));
+                        SetCursorPos(ImVec2(600.0f * scale_x, 400.0f * scale_y));
                         PushFont(NULL, 28.0f); // Next put it 16
 
                         Text("You have no songs");
 
                         PopFont();
                         
-                        SetCursorPos(ImVec2(600.0f, 440.0f));
+                        SetCursorPos(ImVec2(590.0f * scale_x, 440.0f * scale_y));
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
                         PushFont(NULL, 18.5f);
 
@@ -495,17 +540,17 @@ void Gui()
                     else if (LibraryTabSystem == 1)
                     {
                         // Put this to an else statement after i make the find music statement later
-                        SetCursorPos(ImVec2(690.0f, 300.0f));
+                        SetCursorPos(ImVec2(690.0f * scale_xyzx, 300.0f * scale_y));
                         Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
 
-                        SetCursorPos(ImVec2(600.0f, 400.0f));
+                        SetCursorPos(ImVec2(600.0f * scale_x, 400.0f * scale_y));
                         PushFont(NULL, 28.0f); // Next put it 16
 
                         Text("You have no albums");
 
                         PopFont();
                         
-                        SetCursorPos(ImVec2(600.0f, 440.0f));
+                        SetCursorPos(ImVec2(600.0f * scale_x, 440.0f * scale_y));
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
                         PushFont(NULL, 18.5f);
 
