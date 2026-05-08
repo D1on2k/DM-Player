@@ -123,6 +123,7 @@ void Gui()
     static ID3D11ShaderResourceView* BigNote = LoadTexture("Assets/Window/music(2).png", g_pd3dDevice);
     static ID3D11ShaderResourceView* inbox = LoadTexture("Assets/Window/inbox.png", g_pd3dDevice);
     static ID3D11ShaderResourceView* search = LoadTexture("Assets/Window/search-interface-symbol(1).png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* playlist1 = LoadTexture("Assets/Window/playlist.png", g_pd3dDevice);
 
     // Main Window loop
     bool done = false;
@@ -484,8 +485,10 @@ void Gui()
                     InputTextWithHint("        ", "Search library...", HoldSearch, sizeof(HoldSearch));
                     const char* items[] = {/* Add later the function with the names in order to actually search */};
                    
-                    for (const char* item : items) {
-                        if (strstr(item, HoldSearch) != nullptr) { // Check if we have what the user is searching maybe add later a function with algorithm that can see lowercase and upercase
+                    for (const char* item : items) 
+                    {
+                        if (strstr(item, HoldSearch) != nullptr) // Check if we have what the user is searching maybe add later a function with algorithm that can see lowercase and upercase
+                        { 
                             Text("%s", item); // Very simple logic of finding the item
                         }
                     }
@@ -606,7 +609,76 @@ void Gui()
                 
                 else if (Tabsystem == 2)
                 {
+                    SetCursorPos(ImVec2(255.0f, 70.0f));
+                    PushFont(NULL, 22.0f);
 
+                    Text("Playlists");
+
+                    PopFont();
+
+                    GetWindowDrawList()->AddLine(ImVec2(p.x + 260.0f, p.y + -100.0f), ImVec2(p.x + 1820.0f, p.y + -100.0f), // first x is for left right second x is for length first and second y are for rotating
+                    GetColorU32(ImGuiCol_Separator), 1.0f);
+
+                    if (g_IsMaximized == false)
+                    {
+                        SetCursorPos(ImVec2(960.0f * scale_x, 120.0f));
+                    }
+
+                    else
+                    {
+                        SetCursorPos(ImVec2(1018.0f * scale_x, 120.0f));
+                    }
+                    
+                    SetNextItemWidth(200.0f);
+                    
+                    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(30.0f, 8.0f));
+                    PushStyleColor(ImGuiCol_Text, ImVec4(0.6, 0.6, 0.6, 1.0f));
+                    PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.13f, 0.13f, 0.13f, 1.0f));
+                   
+                    InputTextWithHint("        ", "Search playlist...", HoldSearch, sizeof(HoldSearch));
+                    const char* items[] = {/* Add later the function with the names in order to actually search */};
+                   
+                    for (const char* item : items) 
+                    {
+                        if (strstr(item, HoldSearch) != nullptr) // Check if we have what the user is searching maybe add later a function with algorithm that can see lowercase and upercase
+                        { 
+                            Text("%s", item); // Very simple logic of finding the item
+                        }
+                    }
+
+                    PopStyleVar();
+                    PopStyleColor(2);
+                    
+                    SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
+                    Image((ImTextureID)playlist1, ImVec2(64.0f, 64.0f));
+
+                    SetCursorPos(ImVec2(700.0f * scale_x, 400.0f * scale_y));
+                    PushFont(NULL, 28.0f);
+
+                    Text("No playlists yet");
+
+                    PopFont();
+                        
+                    SetCursorPos(ImVec2(687.8f * scale_x, 440.0f * scale_y));
+                    PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                    PushFont(NULL, 18.5f);
+
+                    Text("Create a playlist to get started.");
+                        
+                    PopStyleColor();
+                    PopFont();
+
+                    if (g_IsMaximized == false)
+                    {
+                        SetCursorPos(ImVec2(970.0f, 128.0f));
+                    }
+                    
+                    else
+                    {
+                        SetCursorPos(ImVec2(970.0f * scale_xyzx, 128.0f));
+                    }
+
+                    Image((ImTextureID)search, ImVec2(16.0f, 16.0f));
                 }
                 
                 else if (Tabsystem == 3)
