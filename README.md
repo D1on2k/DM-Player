@@ -22,4 +22,4 @@ currently on the front end stage with a little bit of the backend in this state 
 > PR Requests are available and I would be very happy to get some help by the community.
 
 ## BIG THANKS TO:
-Freepik Hirschwolf JessiGue Ranah Becris Pixel Studio Those Icons Kiranshastry and Catalin Fertu from www.flaticon.com the icons were made by them.
+Freepik Hirschwolf JessiGue Ranah Becris Pixel Studio Those Icons Kiranshastry Catalin Fertu and juicy_fish from www.flaticon.com the icons were made by them.
