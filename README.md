@@ -15,7 +15,8 @@ currently on the front end stage with a little bit of the backend in this state 
 - Custom Window
 - Image Searching
 - Working UI Scaling
-- 3 / 4 Tabs finished
+- 4 / 4 Tabs finished
+- Theme changing Dark/Light
 
 ---
 
