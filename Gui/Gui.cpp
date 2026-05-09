@@ -163,7 +163,9 @@ void Gui()
         }
         
         // Change Background Color
-        ImVec4 clear_color = ImVec4(0.600f, 0.600f, 0.600f, 1.000f);
+        static ImVec4 clear_color = ImVec4(0.600f, 0.600f, 0.600f, 1.000f);
+        static ImVec4 light_color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+        
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         NewFrame();
@@ -880,13 +882,38 @@ void Gui()
                     GetColorU32(ImGuiCol_Separator), 1.0f);
 
                     SetCursorPos(ImVec2(255.0f, 200.0f));
-                    PushFont(NULL, 30.0f);
+                    PushFont(NULL, 25.0f);
 
                     Text("Set Path For music:");
 
                     PopFont();
 
-                    InputText("(Select Ur Runing Process)", IAMTIRED);
+                    //InputText("(Select Ur Runing Process)", IAMTIRED); Add it when i make the searching function
+                    
+                    PushFont(NULL, 22.0f);
+
+                    SetCursorPos(ImVec2(255.0f, 300.0f));
+
+                    if (Checkbox("Dark mode", &idk))
+                    {
+                        if (idk)
+                        {
+                            clear_color = ImVec4(0.600f, 0.600f, 0.600f, 1.000f);
+                        }
+
+                        else
+                        {
+                            clear_color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+                        }
+                        
+                    }
+
+                    else
+                    {
+                        
+                    }
+
+                    PopFont();
                 }
 
                 PopStyleColor(3);
