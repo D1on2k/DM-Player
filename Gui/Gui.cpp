@@ -124,6 +124,8 @@ void Gui()
     static ID3D11ShaderResourceView* inbox = LoadTexture("Assets/Window/inbox.png", g_pd3dDevice);
     static ID3D11ShaderResourceView* search = LoadTexture("Assets/Window/search-interface-symbol(1).png", g_pd3dDevice);
     static ID3D11ShaderResourceView* playlist1 = LoadTexture("Assets/Window/playlist.png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* playlist2 = LoadTexture("Assets/Window/playlist(1).png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* bigheart = LoadTexture("Assets/Window/heart2.png", g_pd3dDevice);
 
     // Main Window loop
     bool done = false;
@@ -222,7 +224,7 @@ void Gui()
 
                 if (Button("   ", ImVec2(38.5f, 37.8f)))
                 {
-                    PostQuitMessage(0); // was a bit too rushed abort();
+                    PostQuitMessage(0);
                 }
                 
                 SetCursorPos(ImVec2(windowSize.x - 40.0f, 3.8f));
@@ -313,6 +315,32 @@ void Gui()
                 ImVec2 p = GetCursorScreenPos();
                 GetWindowDrawList()->AddLine(ImVec2(p.x + -7.0f, p.y + 17.0f), ImVec2(p.x + 222.0f, p.y + 17.0f), 
                 GetColorU32(ImGuiCol_Separator), 1.0f);
+
+                SetCursorPos(ImVec2(40.0f * scale_x, 380.0f * scale_y));
+                PushFont(NULL, 16.0f);
+
+                Text("No playlists yet");
+
+                PopFont();
+                        
+                SetCursorPos(ImVec2(20.0f * scale_x, 400.0f * scale_y));
+                PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                PushFont(NULL, 13.5f);
+
+                Text("Create a playlist to get started.");
+                        
+                PopStyleColor();
+                PopFont();
+
+                if (g_IsMaximized == false)
+                {
+                    SetCursorPos(ImVec2(970.0f, 128.0f));
+                }
+                    
+                else
+                {
+                    SetCursorPos(ImVec2(970.0f * scale_xyzx, 128.0f));
+                }
 
                 if (Tabsystem == 0) 
                 {   
@@ -683,12 +711,182 @@ void Gui()
                 
                 else if (Tabsystem == 3)
                 {
+                    SetCursorPos(ImVec2(255.0f, 70.0f));
+                    PushFont(NULL, 22.0f);
+
+                    Text("Favourites");
+
+                    PopFont();
+
+                    SetCursorPos(ImVec2(265.0f, 120.0f));
+
+                    if(Button("Songs", ImVec2(53.0f, 20.0f)))
+                    {
+                        LibraryTabSystem = 0;
+                    }
+
+                    SameLine(0.0f, 15.0f);
+
+                    if(Button("Albums", ImVec2(55.0f, 23.0f)))
+                    {
+                        LibraryTabSystem = 1;
+                    }
+
+                    SameLine(0.0f, 15.0f);
+
+                    if(Button("Foldiers", ImVec2(57.0f, 25.0f)))
+                    {
+                        LibraryTabSystem = 2;
+                    }
+
+                    // Band ade code till i find a solution to how to fix this 
+                    if (g_IsMaximized == false)
+                    {
+                        SameLine(0.0f, 500.0f);
+                    }
+                    
+                    else
+                    {
+                        SameLine(0.0f, 1170.0f);
+                    }
+                   
+                    SetNextItemWidth(200.0f);
+                    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(30.0f, 8.0f));
+                    PushStyleColor(ImGuiCol_Text, ImVec4(0.6, 0.6, 0.6, 1.0f));
+                    PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.13f, 0.13f, 0.13f, 1.0f));
+                   
+                    InputTextWithHint("        ", "Search library...", HoldSearch, sizeof(HoldSearch));
+                    const char* items[] = {/* Add later the function with the names in order to actually search */};
+                   
+                    for (const char* item : items) 
+                    {
+                        if (strstr(item, HoldSearch) != nullptr) // Check if we have what the user is searching maybe add later a function with algorithm that can see lowercase and upercase
+                        { 
+                            Text("%s", item); // Very simple logic of finding the item
+                        }
+                    }
+                    
+                    if (g_IsMaximized == false)
+                    {
+                        SetCursorPos(ImVec2(970.0f, 128.0f));
+                    }
+                    
+                    else
+                    {
+                        SetCursorPos(ImVec2(970.0f * scale_xyzx, 128.0f));
+                    }
+
+                    Image((ImTextureID)search, ImVec2(16.0f, 16.0f));
+                    
+                    PopStyleVar();
+                    PopStyleColor(2);
+
+                    GetWindowDrawList()->AddLine(ImVec2(p.x + 260.0f, p.y + -100.0f), ImVec2(p.x + 1820.0f, p.y + -100.0f), // first x is for left right second x is for length first and second y are for rotating
+                    GetColorU32(ImGuiCol_Separator), 1.0f);
+
+                    if (LibraryTabSystem == 0)
+                    {
+                        SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
+                        Image((ImTextureID)bigheart, ImVec2(64.0f, 64.0f));
+
+                        SetCursorPos(ImVec2(700.0f * scale_x, 400.0f * scale_y));
+                        PushFont(NULL, 28.0f);
+
+                        Text("No favourites yet");
+
+                        PopFont();
+                            
+                        SetCursorPos(ImVec2(687.8f * scale_x, 440.0f * scale_y));
+                        PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                        PushFont(NULL, 18.5f);
+
+                        Text("Add songs and albums to your favourites.");     
+                        
+                        PopFont();
+                        PopStyleColor();
+                    }
+
+                    else if (LibraryTabSystem == 1)
+                    {
+                        SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
+                        Image((ImTextureID)bigheart, ImVec2(64.0f, 64.0f));
+
+                        SetCursorPos(ImVec2(700.0f * scale_x, 400.0f * scale_y));
+                        PushFont(NULL, 28.0f);
+
+                        Text("No albums yet");
+
+                        PopFont();
+                            
+                        SetCursorPos(ImVec2(687.8f * scale_x, 440.0f * scale_y));
+                        PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                        PushFont(NULL, 18.5f);
+
+                        Text("Add albums to your favourites.");     
+                        
+                        PopFont();
+                        PopStyleColor();
+                    }
+
+                    else if (LibraryTabSystem == 2)
+                    {
+                        SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
+                        Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
+
+                        SetCursorPos(ImVec2(675.0f * scale_x, 400.0f * scale_y));
+                        PushFont(NULL, 28.0f); // Next put it 16
+
+                        Text("You haven't selected a folder");
+
+                        PopFont();
+                        
+                        SetCursorPos(ImVec2(680.0f * scale_x, 440.0f * scale_y));
+                        PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                        PushFont(NULL, 18.5f);
+
+                        Text("Go to settings and select a folder to start.");
+                        
+                        PopStyleColor();
+                        PopFont();
+
+                        PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                        PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                        PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+                        PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
+                        
+                        SetCursorPos(ImVec2(710.0f * scale_xyzx, 470.0f * scale_y));
+
+                        if (Button(" Settings ", ImVec2(70.0f, 50.0f)))
+                        {
+                            Tabsystem = 4;
+                        }
+
+                        PopStyleColor(3);
+                        PopStyleVar();
+                    }
 
                 }
                 
                 else if (Tabsystem == 4)
                 {
+                    SetCursorPos(ImVec2(255.0f, 70.0f));
+                    PushFont(NULL, 22.0f);
 
+                    Text("Settings");
+
+                    PopFont();
+
+                    GetWindowDrawList()->AddLine(ImVec2(p.x + 320.0f, p.y + -160.0f), ImVec2(p.x + 247.0f, p.y + -160.0f), // first x is for left right second x is for length first and second y are for rotating
+                    GetColorU32(ImGuiCol_Separator), 1.0f);
+
+                    SetCursorPos(ImVec2(255.0f, 200.0f));
+                    PushFont(NULL, 30.0f);
+
+                    Text("Set Path For music:");
+
+                    PopFont();
+
+                    InputText("(Select Ur Runing Process)", IAMTIRED);
                 }
 
                 PopStyleColor(3);
