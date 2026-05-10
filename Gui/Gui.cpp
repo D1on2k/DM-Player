@@ -1,15 +1,6 @@
 // Gui.cpp
 
-#include <windows.h>
-#include "ImGui/imgui.h"
-#include "ImGui/imconfig.h"
-#include "ImGui/backends/imgui_impl_win32.h"
-#include "ImGui/backends/imgui_impl_dx11.h"
-#include "ImGui/ImGui.h"
-#include "ImGui/imgui_internal.h"
 #include "Gui.h"
-#include "Searching/searching.h"
-#include <tlhelp32.h>
 
 using namespace ImGui;
 
@@ -126,6 +117,7 @@ void Gui()
     static ID3D11ShaderResourceView* playlist1 = LoadTexture("Assets/Window/playlist.png", g_pd3dDevice);
     static ID3D11ShaderResourceView* playlist2 = LoadTexture("Assets/Window/playlist(1).png", g_pd3dDevice);
     static ID3D11ShaderResourceView* bigheart = LoadTexture("Assets/Window/heart2.png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* albumTexture = nullptr;
 
     // Main Window loop
     bool done = false;
@@ -347,13 +339,43 @@ void Gui()
                 if (Tabsystem == 0) 
                 {   
                     
-                    
-                    // Checking and displaying if we find the image 
-                    if (takepath != "")
+                    if (!scan || FoldierPath != searchpathformusic)
                     {
-                        SetCursorPos(ImVec2(255.0f, 155.0f));
+                        if (albumTexture)
+                        {
+                            albumTexture->Release();
+                            albumTexture = nullptr;
+                        }
 
-                        Text("image found", searchfortitle.c_str());
+                        findimages();
+                        scan = true;
+
+                        if (!takepath.empty())
+                        {
+                            albumTexture = LoadTexture(takepath.c_str(), g_pd3dDevice);
+                        }
+                    }
+
+                    if (albumTexture != nullptr)
+                    {
+                        SetCursorPos(ImVec2(260.0f, 70.0f));
+
+                        Image((ImTextureID)albumTexture, ImVec2(200.0f, 200.0f));
+                    }
+
+                    /* Here is the title
+                    else if (!scan || FoldierPath != searchfortitle)
+                    {
+                        
+                    }
+                    */
+
+                    // Checking and displaying if we find the image 
+                    else if (takepath != "")
+                    {
+                        //SetCursorPos(ImVec2(300.0f, 155.0f));
+
+                        Text("No image was found");
                     }
 
                     else
@@ -888,8 +910,26 @@ void Gui()
 
                     PopFont();
 
-                    //InputText("(Select Ur Runing Process)", IAMTIRED); Add it when i make the searching function
+                    SetNextItemWidth(200.0f);
+
+                    SetCursorPos(ImVec2(460.0f, 200.0f));
+
+                    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(15.0f, 8.0f));
+                    PushStyleColor(ImGuiCol_Text, ImVec4(0.6, 0.6, 0.6, 1.0f));
+                    PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.20f, 0.20f, 0.20f, 1.0f));
+
+                    if (!FoldierPath.empty())
+                        strcpy_s(pathBuffer, sizeof(pathBuffer), FoldierPath.c_str());
+
+                    if (InputText("            ", pathBuffer, sizeof(pathBuffer)))
+                    {
+                        FoldierPath = pathBuffer;
+                        SaveMusicPath();
+                    }
                     
+                    PopStyleVar();
+                    PopStyleColor(2);
+
                     PushFont(NULL, 22.0f);
 
                     SetCursorPos(ImVec2(255.0f, 300.0f));
@@ -903,7 +943,7 @@ void Gui()
 
                         else
                         {
-                            clear_color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
+                            clear_color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // Here is the issue 
                         }
                         
                     }
