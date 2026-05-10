@@ -363,12 +363,24 @@ void Gui()
                         Image((ImTextureID)albumTexture, ImVec2(200.0f, 200.0f));
                     }
 
-                    /* Here is the title
-                    else if (!scan || FoldierPath != searchfortitle)
+                    
+                    if (!scan || FoldierPath != searchpathformusic)
                     {
-                        
+                        findimages();
+                        scan = true;
                     }
-                    */
+
+                    if (!takepath.empty())
+                    {
+                        SetCursorPos(ImVec2(500.0f, 170.0f));
+
+                        PushFont(NULL, 24.0f);
+
+                        Text("%s", foldiername.c_str()); // searchfortitle.c_str() is for song name
+
+                        PopFont();
+                    }   
+                    
 
                     // Checking and displaying if we find the image 
                     else if (takepath != "")
