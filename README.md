@@ -2,9 +2,9 @@
 
 # DM-Player
 
-A light weight media player using Dear ImGui as a framework DirectX 11 and win 32 API for window functions.
-
 <br>
+
+A light weight media player using Dear ImGui as a framework DirectX 11 and win 32 API for window functions.
 
 <br>
 
@@ -43,6 +43,18 @@ Currently running at about ~1 CPU utilization and just under 17 MB of ram while 
 ## [Screenshot/Demo]
 <img width="1197" height="799" alt="image" src="https://github.com/user-attachments/assets/09ce7465-526f-4587-8fe3-e5bce5be146c" />
 
+---
+
+## Building
+```bash
+  git clone https://github.com/D1on2k/DM-Player.git
+  cd DM-Player
+  mkdir build
+  cd build
+  cmake -G Ninja ..
+  ninja
+```
+---
 
 ## Contributing
 
