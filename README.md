@@ -31,6 +31,7 @@ almost finished front end now starting to focus more on the backend in this stat
 - Working UI Scaling.
 - 4 / 4 Tabs finished.
 - Theme changing Dark/Light.
+- Album cover displaying.
 
 ---
 
