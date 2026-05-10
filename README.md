@@ -1,9 +1,23 @@
+<div align="center">
+
 # DM-Player
+
 A light weight media player using Dear ImGui as a framework DirectX 11 and win 32 API for window functions.
+
+<br>
+
+<br>
+
+[<img src="https://img.shields.io/badge/Download-v1.1-D5006D?style=for-the-badge&logo=github">](https://github.com/D1on2k/DM-Player/releases/tag/Version_1_1) <img src="https://img.shields.io/badge/platform-Windows-D5006D?style=for-the-badge"> <img src="https://img.shields.io/github/license/D1on2k/DInjector?style=for-the-badge&color=D5006D"> <img src="https://img.shields.io/badge/C%2B%2B-17-D5006D?style=for-the-badge">
+
+</div>
+
+</div>
 
 ---
 
 # STILL UNDER DEVELOPMENT
+
 almost finished front end now starting to focus more on the backend in this state it would be a great skeleton for someone to use it has a custom made tab system icons and more.
 
 ---
