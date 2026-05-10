@@ -1,8 +1,11 @@
+
+
 #include <string>
 #include <filesystem>
 #include <vector>
 #include <algorithm>
 #include "searching.h"
+#include "PathTab4/select_path.h"
 
 using namespace std;
 using namespace filesystem;
@@ -10,12 +13,20 @@ using namespace filesystem;
 string takepath = "";
 string searchfortitle = "";
 string searchpathformusic = "";
+string foldiername = "";
 
 void findimages() 
 {   
-    // Check if a image exists 
+    path p(FoldierPath);
+    searchpathformusic = p.string();
+    
+    foldiername = p.filename().string(); // get the name of the foldier
+
+    searchpathformusic = FoldierPath;
+
     vector<string> extensions = { ".png", ".jpg", ".jpeg", ".webp" };
 
+    // Check if a image exists 
     try 
     {
         if (exists(searchpathformusic) && is_directory(searchpathformusic)) 
