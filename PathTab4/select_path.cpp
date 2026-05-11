@@ -16,6 +16,7 @@ string WStringToString(const wstring& wstr)
     return result;
 }
 
+
 bool SelectMusicFolder()
 {
     // Setup the folder dialog
@@ -33,8 +34,8 @@ bool SelectMusicFolder()
         
         if (SHGetPathFromIDListA(pidl, path))
         {
-            FoldierPath = path;     // Save the selected path
-            SaveMusicPath();            // Save it to file so it remembers next time
+            FoldierPath = path; // Save the selected path
+            SaveMusicPath(); // Save it to file so it remembers next time
             CoTaskMemFree(pidl);
             return true;
         }
