@@ -1,4 +1,4 @@
-
+// Searchimg.cpp
 
 #include <string>
 #include <filesystem>
@@ -15,12 +15,34 @@ string searchfortitle = "";
 string searchpathformusic = "";
 string foldiername = "";
 
+// Used Llm for this i could not find another way
+pair<string, string> FolderName(const string& folderName) 
+{
+    size_t pos = folderName.find_last_of("-"); // this will find if there is "-" and it will just remove it
+    
+    if (pos != string::npos) // if its found split the string 
+    {
+        string artist = folderName.substr(0, pos);
+        string album = folderName.substr(pos + 2.5);
+
+        return make_pair(artist, album);
+    } 
+    /*
+    else 
+    {
+        return make_pair(folderName, "No Artist Found.");
+    }
+        */
+}
+
 void findimages() 
 {   
     path p(FoldierPath);
     searchpathformusic = p.string();
     
     foldiername = p.filename().string(); // get the name of the foldier
+
+    pair<string, string> parsedName = FolderName(foldiername);
 
     searchpathformusic = FoldierPath;
 
@@ -57,4 +79,14 @@ void findimages()
     {
 
     }
+}
+
+bool idk12123(const std::string& folderName, std::string& artist, std::string& album) 
+{
+    std::pair<std::string, std::string> Name = FolderName(folderName);
+    
+    artist = Name.first;
+    album = Name.second;
+    
+    return !artist.empty();
 }
