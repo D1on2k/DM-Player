@@ -371,14 +371,38 @@ void Gui()
                     }
 
                     if (!takepath.empty())
-                    {
-                        SetCursorPos(ImVec2(500.0f, 170.0f));
+                    {   
+                        std::string artist, album;
+
+                        idk12123(foldiername, artist, album);
+
+                        SetCursorPos(ImVec2(494.0f, 170.0f));
 
                         PushFont(NULL, 24.0f);
 
-                        Text("%s", foldiername.c_str()); // searchfortitle.c_str() is for song name
+                        Text("%s", album.c_str()); // searchfortitle.c_str() is for song name
 
                         PopFont();
+
+                        if (!artist.empty())
+                        {   
+                            PushFont(NULL, 16.0f);
+                            SetCursorPos(ImVec2(500.0f, 200.0f));
+
+                            Text("%s", artist.c_str());
+
+                            PopFont();
+                        }
+
+                        else 
+                        {   
+                            PushFont(NULL, 16.0f);
+                            SetCursorPos(ImVec2(500.0f, 200.0f));
+
+                            Text("No artist was found");
+                            
+                            PopFont();
+                        }
                     }   
                     
 
