@@ -1,15 +1,39 @@
 // Gui.cpp
 
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "Gui.h"
+#include "stb_image.h"
 
 using namespace ImGui;
 
-extern ID3D11Device* g_pd3dDevice;
-extern ID3D11DeviceContext* g_pd3dDeviceContext;
-extern IDXGISwapChain* g_pSwapChain;
-extern bool g_SwapChainOccluded;
-extern UINT g_ResizeWidth, g_ResizeHeight;
-extern ID3D11RenderTargetView* g_mainRenderTargetView;
+ID3D11Device* g_pd3dDevice = nullptr;
+ID3D11DeviceContext* g_pd3dDeviceContext = nullptr;
+IDXGISwapChain* g_pSwapChain = nullptr;
+UINT g_ResizeWidth = 0, g_ResizeHeight = 0;
+ID3D11RenderTargetView* g_mainRenderTargetView = nullptr;
+
+// Declear them here because compiler hates me 
+bool songsLoaded = false;
+bool idk = true;
+bool scan = false;
+bool g_SwapChainOccluded = false;
+bool test = true;
+bool g_IsMaximized = false;
+
+RECT g_WindowRectWhenNormal = {0};
+RECT g_NormalRect = { 0, 0, 0, 0 };
+
+int Tabsystem = 0;
+int LibraryTabSystem = 0;
+int selectedIndex = -1;
+
+char HoldSearch[128] = "";
+char pathBuffer[512] = {};
+char IAMTIRED[256] = "";
+
+std::vector<SongDisplay> songlist;
+std::vector<std::string> songtitles;
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -356,6 +380,41 @@ void Gui()
                         }
                     }
 
+                    SetCursorPos(ImVec2(255.0f, 420.0f));
+                    PushFont(MyFont);
+
+                    ldsngsifneeded();
+
+                    PopFont();
+
+                    SetCursorPos(ImVec2(255.0f, 420.0f));
+                    PushFont(NULL, 16.0f);                    
+
+                    if (!songlist.empty())
+                    {   
+                        SetCursorPos(ImVec2(255.0f, 420.0f));
+                        for (int i = 0; i < songlist.size() && i < 20; i++)
+                        {   
+                            if (Button(songlist[i].title.c_str(), ImVec2(850.0f, 25.0f)))
+                            {
+                                // Add later if it gets clicked to play when i add the bass backend
+                            }
+                            
+                            if (i < songlist.size() - 1)
+                            {
+                                ImGui::SameLine(p.x + 223.0f);
+                                ImGui::Separator();
+                            }
+                        }
+                    }
+                    
+                    else
+                    {
+                        Text("No songs found");
+                    }
+
+                    PopFont();
+
                     if (albumTexture != nullptr)
                     {
                         SetCursorPos(ImVec2(260.0f, 70.0f));
@@ -363,7 +422,6 @@ void Gui()
                         Image((ImTextureID)albumTexture, ImVec2(200.0f, 200.0f));
                     }
 
-                    
                     if (!scan || FoldierPath != searchpathformusic)
                     {
                         findimages();
@@ -1206,7 +1264,16 @@ void ToggleMaximize(HWND hwnd)
         g_IsMaximized = true;
     }
 }
-
+/*
+void ldsngsifneeded() 
+{
+    if (songsLoaded || FoldierPath.empty())
+    {
+        scanfiles();
+        songsLoaded = true;
+    }
+}
+*/
 int main()
 {
     Gui();
