@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-file(GLOB SOURCES "*.cpp" "Gui/*.cpp" "Searching/*.cpp" "PathTab4/*.cpp")
+file(GLOB SOURCES "*.cpp" "Gui/*.cpp" "Searching/*.cpp" "PathTab4/*.cpp" "AudioScanner/*.cpp")
 
 file(GLOB IMGUI_CORE "ImGui/*.cpp")
 file(GLOB IMGUI_BACKEND "ImGui/backends/imgui_impl_win32.cpp" "ImGui/backends/imgui_impl_dx11.cpp")
