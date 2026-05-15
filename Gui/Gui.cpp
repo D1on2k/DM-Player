@@ -387,33 +387,148 @@ void Gui()
 
                     PopFont();
 
-                    SetCursorPos(ImVec2(255.0f, 420.0f));
-                    PushFont(NULL, 16.0f);                    
-
                     if (!songlist.empty())
                     {   
-                        SetCursorPos(ImVec2(255.0f, 420.0f));
-                        for (int i = 0; i < songlist.size() && i < 20; i++)
-                        {   
-                            if (Button(songlist[i].title.c_str(), ImVec2(850.0f, 25.0f)))
+                        // Used help from LLM here I couldn't find a way to put the name under name album under album etc but i did tweak it a bit my self.
+                        ImVec2 ws = GetWindowSize();
+                        float sx = ws.x / 1200.0f;
+
+                        float tableStartY = 0.0f; //2
+                        float tableEndY   = ws.y - 800.0f; // bottom padding
+                        float availableH  = tableEndY - tableStartY - 0.0f; // 30 = header row height
+                        
+                        int songCount    = (int)songlist.size();
+                        float rowHeight  = availableH / (float)songCount;
+                        
+                        //if (rowHeight < 10.0f) rowHeight = 10.0f; // minimum so text isnt invisible
+                        if (rowHeight > 20.0f) rowHeight = 20.0f; // never taller than this
+                        
+                        SetCursorPos(ImVec2(250.0f, 355.0f));
+                        //ImGui::SetCursorPos(ImVec2(185.0f, tableStartY));
+
+                        // Kill the gray header background and borders
+                        PushStyleColor(ImGuiCol_TableHeaderBg,    ImVec4(0, 0, 0, 0));
+                        PushStyleColor(ImGuiCol_TableBorderLight, ImVec4(0, 0, 0, 0));
+                        PushStyleColor(ImGuiCol_TableBorderStrong,ImVec4(0, 0, 0, 0));
+                        PushStyleColor(ImGuiCol_HeaderHovered,    ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                        PushStyleColor(ImGuiCol_HeaderActive,     ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
+                        PushStyleColor(ImGuiCol_ButtonActive,     ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+
+                        ImGuiTableFlags flags =
+                            ImGuiTableFlags_SizingFixedFit |
+                            ImGuiTableFlags_BordersInnerH  |
+                            ImGuiTableFlags_NoSavedSettings;
+
+                        float tableW = ws.x - 185.0f;
+
+                        if (BeginTable("SongTable", 5, flags, ImVec2(tableW, availableH + 30.0f)))
+                        {
+                            TableSetupColumn("#",        ImGuiTableColumnFlags_WidthFixed, 40.0f);
+                            TableSetupColumn("Title",    ImGuiTableColumnFlags_WidthFixed, 240.0f * sx);
+                            TableSetupColumn("Artist",   ImGuiTableColumnFlags_WidthFixed, 200.0f * sx);
+                            TableSetupColumn("Album",    ImGuiTableColumnFlags_WidthFixed, 200.0f * sx);
+                            TableSetupColumn("Duration", ImGuiTableColumnFlags_WidthFixed, 80.0f  * sx);
+                            
+                            TableHeadersRow();
+
+                            // Space between header and first song row
+                            TableNextRow(ImGuiTableRowFlags_None, 20.0f);
+
+                            PushFont(MyFont);
+                            for (int i = 0; i < songCount; i++)
                             {
-                                // Add later if it gets clicked to play when i add the bass backend
+                                const auto& song = songlist[i];
+                                TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+
+                                TableSetColumnIndex(0);
+                                Text("%02d", i + 1);
+
+                                TableSetColumnIndex(1);
+                                std::string selID = "##sel" + std::to_string(i);
+                                if (ImGui::Selectable(selID.c_str(), selectedIndex == i,
+                                    ImGuiSelectableFlags_SpanAllColumns,
+                                    ImVec2(0, rowHeight)))
+                                    selectedIndex = i;
+                                SameLine();
+                                TextUnformatted(song.title.c_str());
+
+                                TableSetColumnIndex(2);
+                                TextUnformatted(song.artist.c_str());
+
+                                TableSetColumnIndex(3);
+                                TextUnformatted(song.album.c_str());
+
+                                TableSetColumnIndex(4);
+                                Text(""); // add a function in the future when i make it 
+
                             }
                             
-                            if (i < songlist.size() - 1)
-                            {
-                                ImGui::SameLine(p.x + 223.0f);
-                                ImGui::Separator();
-                            }
+                            PopStyleColor(6);
+                            PopFont();
+                            EndTable();
                         }
                     }
-                    
+
                     else
                     {
-                        Text("No songs found");
-                    }
+                        SetCursorPos(ImVec2(255.0f, 355.0f));
+                        PushFont(MyFont);
+                        
+                        if (Button("#", ImVec2(16.0f, 16.0f)))
+                        {
+                            // Do something 
+                        }
+                        PopFont();
 
-                    PopFont();
+                        SameLine(0.0f, 70.0f * scale_x);
+
+                        if (Button("Title", ImVec2(50.0f, 20.0f)))
+                        {
+
+                        }
+
+                        SameLine(0.0f, 150.0f * scale_x);
+
+                        if (Button("Artist", ImVec2(52.0f, 20.0f)))
+                        {
+
+                        }
+
+                        SameLine(0.0f, 160.0f * scale_x);
+
+                        if (Button("Album", ImVec2(50.0f, 20.0f)))
+                        {
+
+                        }
+                        
+                        // Another band aid 
+                        if (g_IsMaximized == false)
+                        {
+                            SameLine(0.0f, 300.0f * scale_x);
+                        }
+                        
+                        else
+                        {
+                            SameLine(0.0f, 320.0f * scale_xy);
+                        }
+                        
+
+                        if (Button("Duration", ImVec2(80.0f, 20.0f)))
+                        {
+                            
+                        }
+                        if (g_IsMaximized == false)
+                        {
+                            SetCursorPos(ImVec2(1090.0f * scale_x, 356.8f));
+                        }
+                        
+                        else 
+                        {
+                            SetCursorPos(ImVec2(1130.0f * scale_x, 356.8f));
+                        }
+                        
+                        Image((ImTextureID)clock, ImVec2(16.0f, 16.0f));
+                    }
 
                     if (albumTexture != nullptr)
                     {
@@ -520,64 +635,6 @@ void Gui()
                     
                     GetWindowDrawList()->AddLine(ImVec2(p.x + 223.0f, p.y + 130.0f), ImVec2(p.x + 3500.0f, p.y + 130.0f), 
                     GetColorU32(ImGuiCol_Separator), 1.0f);
-
-                    SetCursorPos(ImVec2(255.0f, 355.0f));
-                    PushFont(MyFont);
-                    
-                    if (Button("#", ImVec2(16.0f, 16.0f)))
-                    {
-                        // Do something 
-                    }
-                    PopFont();
-
-                    SameLine(0.0f, 30.0f * scale_x);
-
-                    if (Button("Title", ImVec2(50.0f, 20.0f)))
-                    {
-
-                    }
-
-                    SameLine(0.0f, 120.0f * scale_x);
-
-                    if (Button("Artist", ImVec2(52.0f, 20.0f)))
-                    {
-
-                    }
-
-                    SameLine(0.0f, 180.0f * scale_x);
-
-                    if (Button("Album", ImVec2(50.0f, 20.0f)))
-                    {
-
-                    }
-                    
-                    // Another band aid 
-                    if (g_IsMaximized == false)
-                    {
-                        SameLine(0.0f, 350.0f * scale_x);
-                    }
-                    
-                    else
-                    {
-                        SameLine(0.0f, 350.0f * scale_xy);
-                    }
-                    
-
-                    if (Button("Duration", ImVec2(80.0f, 20.0f)))
-                    {
-                        
-                    }
-                    if (g_IsMaximized == false)
-                    {
-                        SetCursorPos(ImVec2(1090.0f * scale_x, 356.8f));
-                    }
-                    
-                    else 
-                    {
-                        SetCursorPos(ImVec2(1130.0f * scale_x, 356.8f));
-                    }
-                    
-                    Image((ImTextureID)clock, ImVec2(16.0f, 16.0f));
                 }
                 
                 else if (Tabsystem == 1)
