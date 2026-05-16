@@ -34,6 +34,14 @@ almost finished front end now starting to focus more on the backend in this stat
 - Album cover displaying.
 
 ---
+## Usage
+
+- Run DM_Player.exe.
+- Open `settings` Tab.
+- Enter your path.
+- Enjoy
+
+---
 
 ## Performace
 Currently running at about ~1 CPU utilization and just under 17 MB of ram while idle.
