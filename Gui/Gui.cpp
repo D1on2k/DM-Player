@@ -5,6 +5,7 @@
 #include "Gui.h"
 #include "stb_image.h"
 
+using namespace std;
 using namespace ImGui;
 
 ID3D11Device* g_pd3dDevice = nullptr;
@@ -20,9 +21,12 @@ bool scan = false;
 bool g_SwapChainOccluded = false;
 bool test = true;
 bool g_IsMaximized = false;
+bool pathChanged = false;
 
 RECT g_WindowRectWhenNormal = {0};
 RECT g_NormalRect = { 0, 0, 0, 0 };
+
+string previousPath = "";
 
 int Tabsystem = 0;
 int LibraryTabSystem = 0;
@@ -141,6 +145,7 @@ void Gui()
     static ID3D11ShaderResourceView* playlist1 = LoadTexture("Assets/Window/playlist.png", g_pd3dDevice);
     static ID3D11ShaderResourceView* playlist2 = LoadTexture("Assets/Window/playlist(1).png", g_pd3dDevice);
     static ID3D11ShaderResourceView* bigheart = LoadTexture("Assets/Window/heart2.png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* albemt = LoadTexture("Assets/Window/AlbumEmpty.png", g_pd3dDevice);
     static ID3D11ShaderResourceView* albumTexture = nullptr;
 
     // Main Window loop
@@ -362,7 +367,9 @@ void Gui()
 
                 if (Tabsystem == 0) 
                 {   
-                    
+
+                    // Clear the window with a rectangle 
+                    //GetWindowDrawList()->AddRectFilled(ImVec2(260.0f, 70.0f), ImVec2(460.0f, 270.0f), IM_COL32(0, 0, 0, 255));
                     if (!scan || FoldierPath != searchpathformusic)
                     {
                         if (albumTexture)
@@ -378,7 +385,18 @@ void Gui()
                         {
                             albumTexture = LoadTexture(takepath.c_str(), g_pd3dDevice);
                         }
+
+                        else
+                        {
+                            SetCursorPos(ImVec2(260.0f, 70.0f));
+                            
+                            GetWindowDrawList()->AddRectFilled(ImVec2(260.0f, 70.0f), ImVec2(460.0f, 270.0f), IM_COL32(61, 61, 61, 255));
+                            
+                            Image((ImTextureID)albemt, ImVec2(200.0f, 200.0f));
+                        }
                     }
+                    
+                    
 
                     SetCursorPos(ImVec2(255.0f, 420.0f));
                     PushFont(MyFont);
@@ -386,6 +404,7 @@ void Gui()
                     ldsngsifneeded();
 
                     PopFont();
+
 
                     if (!songlist.empty())
                     {   
@@ -434,6 +453,10 @@ void Gui()
                             // Space between header and first song row
                             TableNextRow(ImGuiTableRowFlags_None, 20.0f);
 
+                            std::string artist, album;
+
+                            idk12123(foldiername, artist, album);
+
                             PushFont(MyFont);
                             for (int i = 0; i < songCount; i++)
                             {
@@ -444,19 +467,21 @@ void Gui()
                                 Text("%02d", i + 1);
 
                                 TableSetColumnIndex(1);
+                                
                                 std::string selID = "##sel" + std::to_string(i);
                                 if (ImGui::Selectable(selID.c_str(), selectedIndex == i,
                                     ImGuiSelectableFlags_SpanAllColumns,
                                     ImVec2(0, rowHeight)))
                                     selectedIndex = i;
-                                SameLine();
+                                
+                                    SameLine();
                                 TextUnformatted(song.title.c_str());
 
                                 TableSetColumnIndex(2);
-                                TextUnformatted(song.artist.c_str());
+                                TextUnformatted(artist.c_str());
 
                                 TableSetColumnIndex(3);
-                                TextUnformatted(song.album.c_str());
+                                TextUnformatted(album.c_str());
 
                                 TableSetColumnIndex(4);
                                 Text(""); // add a function in the future when i make it 
@@ -468,7 +493,7 @@ void Gui()
                             EndTable();
                         }
                     }
-
+                    
                     else
                     {
                         SetCursorPos(ImVec2(255.0f, 355.0f));
@@ -578,7 +603,6 @@ void Gui()
                         }
                     }   
                     
-
                     // Checking and displaying if we find the image 
                     else if (takepath != "")
                     {
@@ -635,6 +659,8 @@ void Gui()
                     
                     GetWindowDrawList()->AddLine(ImVec2(p.x + 223.0f, p.y + 130.0f), ImVec2(p.x + 3500.0f, p.y + 130.0f), 
                     GetColorU32(ImGuiCol_Separator), 1.0f);
+                    
+
                 }
                 
                 else if (Tabsystem == 1)
