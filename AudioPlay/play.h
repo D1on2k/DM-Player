@@ -38,11 +38,17 @@ bool playerifsongjustfinished();
 std::string playergettime(); // must put it as an std or it will get issues with 
 */
 
+extern float volume;
+
 bool playerinitilize();
 bool playerplay(const std::string& filepath);
 bool playerpause();
 bool playerstop();
 bool playerifsongjustfinished();
+bool setvolume(float okbradar);
+
+float getvolume();
+
 std::string playergettime();
 
 void asdasdcleanup();
