@@ -187,7 +187,9 @@ std::string playergettime()
     return g_playit->csongpath;
 }
 
-bool volume(float volume)
+float volume = 0.5f; // I tried with 1.0 it was an ear rape defenetly not recomnded
+
+bool setvolume(float okbradar)
 {
     if (g_playit == nullptr) 
     {
@@ -196,6 +198,8 @@ bool volume(float volume)
 
     if (volume < 0.0f) volume = 0.0f;
     if (volume > 1.0f) volume = 1.0f;
+
+    volume = okbradar;
 
     ma_device_set_master_volume(&g_playit->device, volume);
     
@@ -208,8 +212,6 @@ float getvolume()
     {
         return 1.0f;
     }
-
-    float volume = 0.5f; // I tried with 1.0 it was an ear rape defenetly not recomnded
     
     ma_device_get_master_volume(&g_playit->device, &volume);
     
