@@ -299,6 +299,7 @@ void Gui()
                 float scale_x = windowSize.x / 1200.0f; 
                 float scale_xyzx = windowSize.x / 1138.5f;
                 float scale_xy = windowSize.x / 770.0f;
+                float scale_xyzc = windowSize.x / 1050.0f;
                 
                 float scale_y = windowSize.y / 800.0f;
                 float scale_xyz = windowSize.y / 750.0f;
@@ -431,7 +432,35 @@ void Gui()
 
                     PopFont();
 
+                    // note from yesterday this is the float bar i will use tommorow 
+                    // sliderfloat("name", &volume, 0.0f, 1.0f);
+                    // setvolume(volume)
+                                
+                    // note from the tommorow me which was the yesterday comment: Thank you old self
+                    SetCursorPos(ImVec2(0.0f, 715.0f * scale_y));
+                    
+                    Separator();
 
+                    SetCursorPos(ImVec2(860.0f * scale_xyzc, 750.0f * scale_y));
+                    
+                    /*
+                    ImGuiCol_SliderGrab / Color of the slider's grab handle
+                    ImGuiCol_SliderGrabActive / Color of the grab handle when active
+                    ImGuiStyle::GrabMinSize / Minimum size of the grab handle
+                    ImGuiStyle::FramePadding / Padding around the slider
+                    */
+                    
+                    ImGui::GetStyle().GrabMinSize;
+
+                    SetNextItemWidth(200.0f);
+                    PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    if (SliderFloat("", &volume, 0.0f, 1.0f, "Volume", ImGuiSliderFlags_NoRoundToFormat)) // will add an icon maybe not ImGuiSliderFlags_NoRoundToFormat
+                    {
+                        setvolume(volume);
+                    }
+                    
+                    PopStyleColor();
+                    
                     if (!songlist.empty())
                     {   
                         // Used help from LLM here I couldn't find a way to put the name under name album under album etc but i did tweak it a bit my self.
@@ -519,10 +548,6 @@ void Gui()
                                         // add error handling some day
                                     }
                                 }
-                                
-                                // note from yesterday this is the float bar i will use tommorow 
-                                // sliderfloat("name", &volume, 0.0f, 1.0f);
-                                // setvolume(volume)
 
                                     SameLine();
                                 TextUnformatted(song.title.c_str());
