@@ -171,6 +171,11 @@ void Gui()
     static ID3D11ShaderResourceView* playlist2 = LoadTexture("Assets/Window/playlist(1).png", g_pd3dDevice);
     static ID3D11ShaderResourceView* bigheart = LoadTexture("Assets/Window/heart2.png", g_pd3dDevice);
     static ID3D11ShaderResourceView* albemt = LoadTexture("Assets/Window/AlbumEmpty.png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* volume2 = LoadTexture("Assets/Window/volume-up(1).png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* pausems = LoadTexture("Assets/Window/pause.png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* playsng = LoadTexture("Assets/Window/play-button-arrowhead.png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* lastsong = LoadTexture("Assets/Window/rewind.png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* next = LoadTexture("Assets/Window/forward.png", g_pd3dDevice);
     static ID3D11ShaderResourceView* albumTexture = nullptr;
 
     // Main Window loop
@@ -441,26 +446,55 @@ void Gui()
                     
                     Separator();
 
+                    SetCursorPos(ImVec2(840.0f * scale_xyzc,750.0f * scale_y));
+                    
+                    Image((ImTextureID)volume2, ImVec2(20.0f, 20.0f));
+
+                    SetCursorPos(ImVec2(200.0f * scale_xy, 750.0f * scale_y));
+
+                    Image((ImTextureID)lastsong, ImVec2(18.0f, 18.0f));
+
+                    SameLine(0.0f, 15.0f);
+
+                    Image((ImTextureID)playsng, ImVec2(16.0f, 16.0f));
+
+                    SameLine(0.0f, 14.0f);
+
+                    Image((ImTextureID)next, ImVec2(17.5f, 17.5f));
+
                     SetCursorPos(ImVec2(860.0f * scale_xyzc, 750.0f * scale_y));
                     
-                    /*
+                    /* 
+                    My research notes:
+                    
                     ImGuiCol_SliderGrab / Color of the slider's grab handle
                     ImGuiCol_SliderGrabActive / Color of the grab handle when active
                     ImGuiStyle::GrabMinSize / Minimum size of the grab handle
                     ImGuiStyle::FramePadding / Padding around the slider
-                    */
                     
-                    ImGui::GetStyle().GrabMinSize;
+                    // I made this but i dont know exactly how to use it
+                    //IMGUI_API bool grabthingrounding(const char* label, float* p_value, float v_min, float v_max, float v_step=50.f);
+                    */
 
+                    PushStyleVar(ImGuiStyleVar_GrabRounding, 999.0f); // make it as round as i can
+                    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 2.0f));
+                    PushStyleVar(ImGuiStyleVar_GrabMinSize, 26.0f); // thank god vs code knows every style var i wouldnt go searching for it online 
+                    
+                    PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                    PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                    PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                    PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+                    PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+                    
                     SetNextItemWidth(200.0f);
-                    PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                    if (SliderFloat("", &volume, 0.0f, 1.0f, "Volume", ImGuiSliderFlags_NoRoundToFormat)) // will add an icon maybe not ImGuiSliderFlags_NoRoundToFormat
+                    if (SliderFloat("", &volume, 0.0f, 1.0f, "")) // will add an icon maybe not ImGuiSliderFlags_NoRoundToFormat
                     {
                         setvolume(volume);
                     }
                     
-                    PopStyleColor();
-                    
+                    PopStyleVar(3);
+                    PopStyleColor(5);
+
                     if (!songlist.empty())
                     {   
                         // Used help from LLM here I couldn't find a way to put the name under name album under album etc but i did tweak it a bit my self.
