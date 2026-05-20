@@ -18,7 +18,7 @@ A light weight media player using Dear ImGui as a framework DirectX 11 and win 3
 
 # STILL UNDER DEVELOPMENT
 
-almost finished front end now starting to focus more on the backend in this state it would be a great skeleton for someone to use it has a custom made tab system icons and more.
+Backend has been offcially fully finished the only thing left is to apply it on the frontend polish the UI and be done with this project
 
 ---
 ## Features
@@ -32,6 +32,10 @@ almost finished front end now starting to focus more on the backend in this stat
 - 4 / 4 Tabs finished.
 - Theme changing Dark/Light.
 - Album cover displaying.
+- Can play music. (not officially released yet)
+- Detect and show album covers.
+- Detect and show songs.
+- Lower or boost volume.
 
 ---
 ## Usage
@@ -44,7 +48,7 @@ almost finished front end now starting to focus more on the backend in this stat
 ---
 
 ## Performace
-Currently running at about ~1 CPU utilization and just under 17 MB of ram while idle.
+Currently running at about ~1 CPU utilization and just under 17 MB of ram while idle. While playing a song it's at ~3% CPU and ~17 MB of ram. (depending on how many songs and image format)
 <img width="632" height="25" alt="image" src="https://github.com/user-attachments/assets/0d4f0c34-2603-4ad7-92ad-99a185763e75" />
 
 ---
