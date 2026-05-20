@@ -70,4 +70,4 @@ Currently running at about ~1 CPU utilization and just under 17 MB of ram while 
 > PR Requests are available and I would be very happy to get some help by the community.
 
 ## BIG THANKS TO:
-Freepik Hirschwolf JessiGue Ranah Becris Pixel Studio Those Icons Kiranshastry Catalin Fertu juicy_fish and Bharat Icons from www.flaticon.com the icons were made by them.
+Freepik Hirschwolf JessiGue Ranah Becris Pixel Studio Those Icons Kiranshastry Catalin Fertu juicy_fish Bharat Icons Debi Alpa Nugraha meaicon and WR Graphic Garage from www.flaticon.com the icons were made by them.
