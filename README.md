@@ -32,10 +32,12 @@ Backend has been offcially fully finished the only thing left is to apply it on 
 - 4 / 4 Tabs finished.
 - Theme changing Dark/Light.
 - Album cover displaying.
-- Can play music. (not officially released yet)
+- Can play music.
 - Detect and show album covers.
 - Detect and show songs.
 - Lower or boost volume.
+- Custom volume bar that updates in real time.
+- Change time mid song.
 
 ---
 ## Usage
