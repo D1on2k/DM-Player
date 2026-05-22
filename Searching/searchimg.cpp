@@ -39,23 +39,23 @@ string searchpathformusic = "";
 string foldiername = "";
 
 // Used Llm for this i could not find another way
-pair<string, string> FolderName(const string& folderName) 
+pair<string, string> FolderName(const string& folderName)
 {
-    size_t pos = folderName.find_last_of("-"); // this will find if there is "-" and it will just remove it
-    
-    if (pos != string::npos) // if its found split the string 
+    size_t pos = folderName.find_last_of("-");
+   
+    if (pos != string::npos)
     {
         string artist = folderName.substr(0, pos);
-        string album = folderName.substr(pos + 2.5);
+        string album = folderName.substr(pos + 1);
 
+        if (!album.empty() && album[0] == ' ')
+            album = album.substr(1);
+            
         return make_pair(artist, album);
-    } 
-    /*
-    else 
-    {
-        return make_pair(folderName, "No Artist Found.");
     }
-        */
+    
+
+    return make_pair(folderName, "Unknown Album");
 }
 
 void findimages() 
@@ -112,4 +112,22 @@ bool idk12123(const std::string& folderName, std::string& artist, std::string& a
     album = Name.second;
     
     return !artist.empty();
+}
+
+// might as well put this here 
+std::string FormatTime(float seconds)
+{
+    if (seconds < 0) 
+    {
+        seconds = 0;
+    }
+    
+    int minutes = (int)seconds / 60;
+    int secs = (int)seconds % 60;
+    
+    char buf[16];
+    
+    sprintf_s(buf, "%02d:%02d", minutes, secs);
+    
+    return std::string(buf);
 }
