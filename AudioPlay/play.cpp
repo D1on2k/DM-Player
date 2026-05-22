@@ -26,8 +26,11 @@ SOFTWARE.
 
 #include "Includes/miniaudio.c"
 #include "play.h"
+#include <mutex>
 
 using namespace std;
+
+std::mutex g_DecoderMutex;
 
 struct playmusic
 {
@@ -48,17 +51,18 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
 
     if (p == NULL || !p->isitplaying)
     {
-        memset(pOutput, 0, frameCount * ma_get_bytes_per_frame(ma_format_f32, 2)); // Do it that way so we fill in the silence 
-
+        memset(pOutput, 0, frameCount * ma_get_bytes_per_frame(ma_format_f32, 2));
         return;
     }
 
     ma_uint64 readframes = 0;
+    
+    g_DecoderMutex.lock();
     ma_decoder_read_pcm_frames(&p->decoder, pOutput, frameCount, &readframes);
+    g_DecoderMutex.unlock();
 
     if (readframes < frameCount)
     {
-        // FIll the rest of the frames with silence so no tss plays in 
         ma_uint32 remain = frameCount - (ma_uint32)readframes;
         size_t perframebytes = ma_get_bytes_per_frame(p->decoder.outputFormat, p->decoder.outputChannels);
 
@@ -88,11 +92,17 @@ bool playerinitilize()
 
 bool playerplay(const string& filepath)
 {
-    if (g_playit == nullptr) return false;
+    if (g_playit == nullptr)
+    {
+        return false;
+    }
 
     if (g_playit->isitplaying)
     {
-        playerstop();
+        ma_device_stop(&g_playit->device);
+        ma_device_uninit(&g_playit->device);
+        ma_decoder_uninit(&g_playit->decoder);
+        g_playit->isitplaying = false;
     }
 
     if (ma_decoder_init_file(filepath.c_str(), NULL, &g_playit->decoder) != MA_SUCCESS)
@@ -127,12 +137,26 @@ bool playerplay(const string& filepath)
     g_playit->isitplaying = true;
     g_playit->songfinished = false;
 
+    ma_device_set_master_volume(&g_playit->device, volume); // this is actually a crusial line yes i will comment it dont mind me 
+                                                            // so if we didnt had this line the volume would restart all time and just be a bad experience with this fix we can have our heads calm.
+
     printf("Successfully started: %s\n", filepath.c_str());
     return true;
 
     // here i shouldve add a thing that says time but i will add it on the ui later
 }
+
+bool playerresume()
+{
+    if (g_playit == nullptr) 
+    {
+        return false;
+    }
     
+    g_playit->isitplaying = true;
+    
+    return true;
+}
 
 bool playerpause()
 {
@@ -150,31 +174,19 @@ bool playerpause()
 bool playerstop()
 {
     if (g_playit == nullptr)
+    {
         return false;
+    }
 
-    ma_device_stop(&g_playit->device);
-    ma_device_uninit(&g_playit->device);
-    ma_decoder_uninit(&g_playit->decoder);
-
-    g_playit->isitplaying = false;
+    if (g_playit->isitplaying)
+    {
+        ma_device_stop(&g_playit->device);
+        ma_device_uninit(&g_playit->device);
+        ma_decoder_uninit(&g_playit->decoder);
+        g_playit->isitplaying = false;
+    }
 
     return true;
-}
-bool playerifsongjustfinished()
-{
-    if (g_playit == nullptr)
-    {
-        return false;
-    }
-
-    if (g_playit->songfinished)
-    {
-        g_playit->songfinished = false;
-
-        return true;
-    }
-
-    return false;
 }
 
 std::string playergettime()
@@ -185,6 +197,82 @@ std::string playergettime()
     }
 
     return g_playit->csongpath;
+}
+
+bool playerifsongjustfinished()
+{
+    if (g_playit == nullptr)
+    {
+        return false;
+    }
+
+    if (g_playit->songfinished)
+    {
+        g_playit->songfinished = false;
+        
+        ma_device_stop(&g_playit->device);
+        ma_device_uninit(&g_playit->device);
+
+        return true;
+    }
+
+    return false;
+}
+
+bool playersongprosomething(float& currentTime, float& totalTime)
+{
+    currentTime = 0.0f;
+    totalTime = 0.0f;
+
+    if (g_playit == nullptr || !g_playit->isitplaying)
+    {
+        return false;
+    }
+
+    g_DecoderMutex.lock();
+
+    ma_uint64 cursor = 0;
+    ma_decoder_get_cursor_in_pcm_frames(&g_playit->decoder, &cursor);
+
+    currentTime = (float)cursor / g_playit->decoder.outputSampleRate;
+
+    ma_uint64 length = 0;
+    if (ma_decoder_get_length_in_pcm_frames(&g_playit->decoder, &length) == MA_SUCCESS)
+    {
+        totalTime = (float)length / g_playit->decoder.outputSampleRate;
+    }
+
+    g_DecoderMutex.unlock();
+
+    return true;
+}
+
+bool playerfindtime(float progress)
+{
+    if (g_playit == nullptr)
+    {
+        return false;
+    }
+
+    if (progress < 0.0f) progress = 0.0f;
+    if (progress > 1.0f) progress = 1.0f;
+
+    g_DecoderMutex.lock();
+
+    ma_uint64 length = 0;
+    if (ma_decoder_get_length_in_pcm_frames(&g_playit->decoder, &length) != MA_SUCCESS)
+    {
+        g_DecoderMutex.unlock();
+        return false;
+    }
+
+    ma_uint64 targetFrame = (ma_uint64)(progress * length);
+
+    bool success = (ma_decoder_seek_to_pcm_frame(&g_playit->decoder, targetFrame) == MA_SUCCESS);
+
+    g_DecoderMutex.unlock();
+
+    return success;
 }
 
 float volume = 0.5f; // I tried with 1.0 it was an ear rape defenetly not recomnded
