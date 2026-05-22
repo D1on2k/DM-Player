@@ -37,4 +37,4 @@ extern std::string foldiername;
 
 void findimages();
 bool idk12123(const std::string& folderName, std::string& artist, std::string& album);
-
+std::string FormatTime(float seconds);
