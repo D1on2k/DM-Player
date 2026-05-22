@@ -44,6 +44,7 @@ bool g_SwapChainOccluded = false;
 bool test = true;
 bool g_IsMaximized = false;
 bool pathChanged = false;
+bool pause = false;
 
 RECT g_WindowRectWhenNormal = {0};
 RECT g_NormalRect = { 0, 0, 0, 0 };
@@ -452,19 +453,200 @@ void Gui()
 
                     SetCursorPos(ImVec2(200.0f * scale_xy, 750.0f * scale_y));
 
-                    Image((ImTextureID)lastsong, ImVec2(18.0f, 18.0f));
+                    if (ImageButton("##playlastsong",(ImTextureID)lastsong, ImVec2(16.0f, 16.0f)))
+                    {
+                        if (!songlist.empty())
+                        {
+                            if (selectedIndex > 0)
+                            {
+                                selectedIndex--;
+                            }
+
+                            else
+                            {
+                                selectedIndex = (int)songlist.size() - 1; // make it so if it reaches the last just make it loop
+                            }
+
+                            playerplay(songlist[selectedIndex].path);
+                            pause = false;
+                        }
+                    }
 
                     SameLine(0.0f, 15.0f);
 
-                    Image((ImTextureID)playsng, ImVec2(16.0f, 16.0f));
+                    // big brain move so if the user wants to pause or play we have to make the icon change dynamically too so i came to this solve
+
+                    ImTextureID bigbrainmove;
+
+                    if (pause)
+                    {
+                        bigbrainmove = (ImTextureID)playsng;
+                    }
+
+                    else
+                    {
+                        bigbrainmove = (ImTextureID)pausems;
+                    }
+
+                    if (ImageButton("##play", bigbrainmove, ImVec2(16.0f, 16.0f))) // found on stack overflow i can use ## instade of just adding spaces
+                    {
+                        if (selectedIndex >= 0 && selectedIndex < songlist.size())
+                        {
+                            if (pause)
+                            {
+                                playerresume();
+                                pause = false;
+                            }
+
+                            else
+                            {
+                                playerpause();
+                                pause = true;
+                            }
+                        }
+
+                        else if (!songlist.empty())
+                        {
+                            selectedIndex = 0;
+                            playerplay(songlist[0].path);
+                            pause = false;
+                        }
+                    }
 
                     SameLine(0.0f, 14.0f);
 
-                    Image((ImTextureID)next, ImVec2(17.5f, 17.5f));
+                    if (ImageButton("##nextbutton", (ImTextureID)next, ImVec2(16.0f, 16.0f)))
+                    {
+                        if (!songlist.empty())
+                        {
+                            if (selectedIndex < (int)songlist.size() - 1)
+                            {
+                                selectedIndex++;
+                            }
+
+                            else
+                            {
+                                selectedIndex = 0;
+                            }
+
+                            playerplay(songlist[selectedIndex].path);
+                            pause = false;
+                        }
+                    }
+                    
+                    // make it that was so if the song finishes to play the next
+                    // used LLM to debug this statement too when i made my version it just auto crashed when a song had finished
+                    if (playerifsongjustfinished())
+                    {
+                        if (!songlist.empty())
+                        {
+                            selectedIndex = (selectedIndex + 1) % (int)songlist.size();
+                            
+                            Sleep(50);  
+                            
+                            if (playerplay(songlist[selectedIndex].path))
+                            {
+                                pause = false;
+                            }
+                            
+                            else
+                            {
+                                selectedIndex = -1;
+                            }
+                        }
+                    }
+                    
+                    float current = 0.0f;
+                    float total = 0.0f;
+                    playersongprosomething(current, total);
+
+                    SetCursorPos(ImVec2(300.0f * scale_xy, 750.0f * scale_y));
+                    Text("%s", FormatTime(current).c_str());
+
+                    SameLine(0.0f, 8.0f);
+                    
+                    SetNextItemWidth(300.0f);
+
+                    // Used LLM to help me here
+                    float currentTime = 0.0f;
+                    float totalTime = 0.0f;
+
+                    // call the function so we dont lose time
+                    bool isSongPlaying = playersongprosomething(currentTime, totalTime);
+
+                    if (isSongPlaying || g_playit != nullptr)
+                    {
+                        static float staticProgress = 0.0f;
+                        static bool isDragging = false;
+
+                        // if the user is not draging the bar we will make the bar move normally
+                        if (!isDragging)
+                        {
+                            staticProgress = (totalTime > 0.0f) ? (currentTime / totalTime) : 0.0f;
+                        }
+
+                        SetCursorPos(ImVec2(300.0f * scale_xy, 750.0f * scale_y));
+                        
+                        // make it show the draged time
+                        if (isDragging)
+                        {
+                            Text("%s", FormatTime(staticProgress * totalTime).c_str());
+                        }
+                        else
+                        {
+                            Text("%s", FormatTime(currentTime).c_str());
+                        }
+
+                        SameLine(0.0f, 8.0f);
+                        SetNextItemWidth(300.0f);
+
+                        PushStyleVar(ImGuiStyleVar_GrabRounding, 999.0f); // make it as round as i can
+                        PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 2.0f));
+                        PushStyleVar(ImGuiStyleVar_GrabMinSize, 26.0f); // thank god vs code knows every style var i wouldnt go searching for it online 
+                        
+                        PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                        PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                        PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                        PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+                        PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+                        
+                        // this returns true while the user is sliding
+                        if (SliderFloat("##findtime", &staticProgress, 0.0f, 1.0f, ""))
+                        {
+                            isDragging = true;
+                        }
+
+                        if (IsItemDeactivatedAfterEdit())
+                        {
+                            playerfindtime(staticProgress);
+                            isDragging = false; 
+                        }
+
+                        SameLine(0.0f, 8.0f);
+                        Text("%s", FormatTime(totalTime).c_str());
+
+                        PopStyleVar(3);
+                        PopStyleColor(5);
+                    }
+                    
+                    else
+                    {
+                        SetCursorPos(ImVec2(300.0f * scale_xy, 750.0f * scale_y));
+                        Text("00:00");
+
+                        SameLine(0.0f, 8.0f);
+                        SetNextItemWidth(300.0f);
+                        
+                        float dummy = 0.0f;
+                        SliderFloat("##idk", &dummy, 0.0f, 1.0f, "");
+                        
+                        SameLine(0.0f, 8.0f);
+                        Text("00:00");
+                    }
 
                     SetCursorPos(ImVec2(860.0f * scale_xyzc, 750.0f * scale_y));
                     
-                    /* 
+                    /*
                     My research notes:
                     
                     ImGuiCol_SliderGrab / Color of the slider's grab handle
