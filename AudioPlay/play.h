@@ -42,9 +42,12 @@ extern float volume;
 
 bool playerinitilize();
 bool playerplay(const std::string& filepath);
+bool playerresume();
 bool playerpause();
 bool playerstop();
 bool playerifsongjustfinished();
+bool playersongprosomething(float& currentTime, float& totalTime);
+bool playerfindtime(float progress);
 bool setvolume(float okbradar);
 
 float getvolume();
@@ -52,3 +55,5 @@ float getvolume();
 std::string playergettime();
 
 void asdasdcleanup();
+
+extern struct playmusic* g_playit;
