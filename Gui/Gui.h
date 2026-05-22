@@ -74,6 +74,7 @@ int selectedIndex = -1;
 extern bool songsLoaded;
 extern bool idk;
 extern bool scan;
+extern bool pause;
 extern bool g_SwapChainOccluded;
 extern bool test;
 extern bool g_IsMaximized;
