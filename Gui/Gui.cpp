@@ -177,6 +177,8 @@ void Gui()
     static ID3D11ShaderResourceView* playsng = LoadTexture("Assets/Window/play-button-arrowhead.png", g_pd3dDevice);
     static ID3D11ShaderResourceView* lastsong = LoadTexture("Assets/Window/rewind.png", g_pd3dDevice);
     static ID3D11ShaderResourceView* next = LoadTexture("Assets/Window/forward.png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* loop = LoadTexture("Assets/Window/loop.png", g_pd3dDevice);
+    static ID3D11ShaderResourceView* loop1 = LoadTexture("Assets/Window/loop(1).png", g_pd3dDevice);
     static ID3D11ShaderResourceView* albumTexture = nullptr;
 
     // Main Window loop
@@ -534,6 +536,27 @@ void Gui()
                         }
                     }
                     
+                    SameLine(0.0f, 10.0f);
+
+                    ImTextureID okok;
+                    static bool loopingorno = false;
+
+                    if (loopingorno)
+                    {
+                        okok = (ImTextureID)loop1;
+                    }
+                    
+                    else
+                    {
+                        okok = (ImTextureID)loop;
+                    }
+
+                    if (ImageButton("##loopbutton", (ImTextureID)okok, ImVec2(18.0f, 18.0f)))
+                    {   
+                        loopingorno = !loopingorno; // make it change the boolean
+                        playerrepeat();
+                    }
+
                     // make it that was so if the song finishes to play the next
                     // used LLM to debug this statement too when i made my version it just auto crashed when a song had finished
                     if (playerifsongjustfinished())
@@ -677,13 +700,19 @@ void Gui()
                     PopStyleVar(3);
                     PopStyleColor(5);
 
+
+
                     if (!songlist.empty())
                     {   
                         // Used help from LLM here I couldn't find a way to put the name under name album under album etc but i did tweak it a bit my self.
                         ImVec2 ws = GetWindowSize();
                         float sx = ws.x / 1200.0f;
 
-                        float tableStartY = 0.0f; //2
+                        float tablexpos = 250.0f;
+                        float tableypos = 357.0f;
+                        float tablebottompadding = 300.0f;
+
+                        float tableStartY = -350.0f; //2
                         float tableEndY   = ws.y - 800.0f; // bottom padding
                         float availableH  = tableEndY - tableStartY - 0.0f; // 30 = header row height
                         
@@ -692,9 +721,9 @@ void Gui()
                         
                         //if (rowHeight < 10.0f) rowHeight = 10.0f; // minimum so text isnt invisible
                         if (rowHeight > 20.0f) rowHeight = 20.0f; // never taller than this
-                        
-                        SetCursorPos(ImVec2(250.0f, 355.0f));
+
                         //ImGui::SetCursorPos(ImVec2(185.0f, tableStartY));
+                        SetCursorPos(ImVec2(tablexpos, tableypos));
 
                         // Kill the gray header background and borders
                         PushStyleColor(ImGuiCol_TableHeaderBg,    ImVec4(0, 0, 0, 0));
@@ -704,25 +733,31 @@ void Gui()
                         PushStyleColor(ImGuiCol_HeaderActive,     ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
                         PushStyleColor(ImGuiCol_ButtonActive,     ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
 
+
                         ImGuiTableFlags flags =
                             ImGuiTableFlags_SizingFixedFit |
                             ImGuiTableFlags_BordersInnerH  |
+                            ImGuiTableFlags_ScrollY |
                             ImGuiTableFlags_NoSavedSettings;
 
-                        float tableW = ws.x - 185.0f;
+                        float tableW = ws.x - 280.0f;
 
-                        if (BeginTable("SongTable", 5, flags, ImVec2(tableW, availableH + 30.0f)))
+                        if (BeginTable("SongTable", 5, flags, ImVec2(tableW, 450.0f)))
+
                         {
+
                             TableSetupColumn("#",        ImGuiTableColumnFlags_WidthFixed, 40.0f);
                             TableSetupColumn("Title",    ImGuiTableColumnFlags_WidthFixed, 240.0f * sx);
                             TableSetupColumn("Artist",   ImGuiTableColumnFlags_WidthFixed, 200.0f * sx);
                             TableSetupColumn("Album",    ImGuiTableColumnFlags_WidthFixed, 200.0f * sx);
                             TableSetupColumn("Duration", ImGuiTableColumnFlags_WidthFixed, 80.0f  * sx);
-                            
-                            TableHeadersRow();
 
+                            TableHeadersRow();
                             // Space between header and first song row
                             TableNextRow(ImGuiTableRowFlags_None, 20.0f);
+                            
+                            ImGuiListClipper clipper;
+                            clipper.Begin((int)songlist.size());
 
                             std::string artist, album;
 
@@ -733,26 +768,25 @@ void Gui()
                             {
                                 const auto& song = songlist[i];
                                 TableNextRow(ImGuiTableRowFlags_None, rowHeight);
-
                                 TableSetColumnIndex(0);
+
                                 Text("%02d", i + 1);
 
                                 TableSetColumnIndex(1);
-                                
+                            
                                 std::string selID = "##sel" + std::to_string(i);
 
-                                if (ImGui::Selectable(selID.c_str(), selectedIndex == i,
+                                if (Selectable(selID.c_str(), selectedIndex == i,
                                     ImGuiSelectableFlags_SpanAllColumns,
                                     ImVec2(0, rowHeight)))
                                 {
                                     selectedIndex = i;
-
                                     if (!song.path.empty())
                                     {
-
                                         if (playerplay(song.path))
                                         {
                                             printf("idk: %s\n", song.title.c_str()); // add them to the UI tommorow not as a printf
+
                                         }
                                         else
                                         {
@@ -764,7 +798,6 @@ void Gui()
                                         // add error handling some day
                                     }
                                 }
-
                                     SameLine();
                                 TextUnformatted(song.title.c_str());
 
@@ -775,8 +808,7 @@ void Gui()
                                 TextUnformatted(album.c_str());
 
                                 TableSetColumnIndex(4);
-                                Text(""); // add a function in the future when i make it 
-
+                                Text(""); // add a function in the future when i make it
                             }
                             
                             PopStyleColor(6);
