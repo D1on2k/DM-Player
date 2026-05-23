@@ -50,8 +50,9 @@ Backend has been offcially fully finished the only thing left is to apply it on 
 ---
 
 ## Performace
-Currently running at about ~1 CPU utilization and just under 17 MB of ram while idle. While playing a song it's at ~3% CPU and ~17 MB of ram. (depending on how many songs and image format)
-<img width="632" height="25" alt="image" src="https://github.com/user-attachments/assets/0d4f0c34-2603-4ad7-92ad-99a185763e75" />
+Currently running at about ~0 CPU utilization and just under 17-16 MB of ram while idle. While playing a song it's at ~0% CPU (if minimized) and ~17 MB of ram (depending on how many songs and image format).
+<img width="635" height="28" alt="image" src="https://github.com/user-attachments/assets/240660f5-afd6-4f55-a10a-b46d73874a3a" />
+
 
 ---
 
