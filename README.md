@@ -8,7 +8,7 @@ A light weight media player using Dear ImGui as a framework DirectX 11 and win 3
 
 <br>
 
-[<img src="https://img.shields.io/badge/Download-v1.5-D5006D?style=for-the-badge&logo=github">](https://github.com/D1on2k/DM-Player/releases/tag/Version1.5) <img src="https://img.shields.io/badge/platform-Windows-D5006D?style=for-the-badge"> <img src="https://img.shields.io/github/license/D1on2k/DInjector?style=for-the-badge&color=D5006D"> <img src="https://img.shields.io/badge/C%2B%2B-17-D5006D?style=for-the-badge">
+[<img src="https://img.shields.io/badge/Download-v1.6-D5006D?style=for-the-badge&logo=github">](https://github.com/D1on2k/DM-Player/releases/tag/Version1.6) <img src="https://img.shields.io/badge/platform-Windows-D5006D?style=for-the-badge"> <img src="https://img.shields.io/github/license/D1on2k/DInjector?style=for-the-badge&color=D5006D"> <img src="https://img.shields.io/badge/C%2B%2B-17-D5006D?style=for-the-badge">
 
 </div>
 
