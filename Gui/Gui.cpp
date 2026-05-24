@@ -45,6 +45,7 @@ bool test = true;
 bool g_IsMaximized = false;
 bool pathChanged = false;
 bool pause = false;
+static bool image = false;
 
 RECT g_WindowRectWhenNormal = {0};
 RECT g_NormalRect = { 0, 0, 0, 0 };
@@ -416,22 +417,33 @@ void Gui()
                         findimages();
                         scan = true;
 
+                        // thought of doing it the easy way which is drawing the
+                        // album every frame but its very unoptmized so i did the static method
+
                         if (!takepath.empty())
                         {
                             albumTexture = LoadTexture(takepath.c_str(), g_pd3dDevice);
+                            image = true;
                         }
 
                         else
                         {
-                            SetCursorPos(ImVec2(260.0f, 70.0f));
-                            
-                            GetWindowDrawList()->AddRectFilled(ImVec2(260.0f, 70.0f), ImVec2(460.0f, 270.0f), IM_COL32(61, 61, 61, 255));
-                            
-                            Image((ImTextureID)albemt, ImVec2(200.0f, 200.0f));
+                            image = false;
                         }
                     }
                     
+                    if (image && albumTexture != nullptr)
+                    {
+                        SetCursorPos(ImVec2(260.0f, 70.0f));
+                        Image((ImTextureID)albumTexture, ImVec2(200.0f, 200.0f));
+                    }
                     
+                    else if (!songlist.empty())
+                    {
+                        SetCursorPos(ImVec2(260.0f, 70.0f));
+                        GetWindowDrawList()->AddRectFilled(ImVec2(260.0f, 70.0f), ImVec2(460.0f, 270.0f), IM_COL32(61, 61, 61, 255));
+                        Image((ImTextureID)albemt, ImVec2(200.0f, 200.0f));
+                    }
 
                     SetCursorPos(ImVec2(255.0f, 420.0f));
                     PushFont(MyFont);
@@ -700,32 +712,24 @@ void Gui()
                     PopStyleVar(3);
                     PopStyleColor(5);
 
-
-
                     if (!songlist.empty())
                     {   
                         // Used help from LLM here I couldn't find a way to put the name under name album under album etc but i did tweak it a bit my self.
                         ImVec2 ws = GetWindowSize();
                         float sx = ws.x / 1200.0f;
 
-                        float tablexpos = 250.0f;
-                        float tableypos = 357.0f;
-                        float tablebottompadding = 300.0f;
-
-                        float tableStartY = -350.0f; //2
+                        float tableStartY = -320.0f; // height of the thing 
                         float tableEndY   = ws.y - 800.0f; // bottom padding
                         float availableH  = tableEndY - tableStartY - 0.0f; // 30 = header row height
-                        
+
                         int songCount    = (int)songlist.size();
                         float rowHeight  = availableH / (float)songCount;
-                        
+
                         //if (rowHeight < 10.0f) rowHeight = 10.0f; // minimum so text isnt invisible
                         if (rowHeight > 20.0f) rowHeight = 20.0f; // never taller than this
 
-                        //ImGui::SetCursorPos(ImVec2(185.0f, tableStartY));
-                        SetCursorPos(ImVec2(tablexpos, tableypos));
+                        SetCursorPos(ImVec2(250.0f, 355.0f));
 
-                        // Kill the gray header background and borders
                         PushStyleColor(ImGuiCol_TableHeaderBg,    ImVec4(0, 0, 0, 0));
                         PushStyleColor(ImGuiCol_TableBorderLight, ImVec4(0, 0, 0, 0));
                         PushStyleColor(ImGuiCol_TableBorderStrong,ImVec4(0, 0, 0, 0));
@@ -733,72 +737,66 @@ void Gui()
                         PushStyleColor(ImGuiCol_HeaderActive,     ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
                         PushStyleColor(ImGuiCol_ButtonActive,     ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
 
-
                         ImGuiTableFlags flags =
                             ImGuiTableFlags_SizingFixedFit |
                             ImGuiTableFlags_BordersInnerH  |
                             ImGuiTableFlags_ScrollY |
                             ImGuiTableFlags_NoSavedSettings;
 
-                        float tableW = ws.x - 280.0f;
+                        float tableW = ws.x - 185.0f;
 
-                        if (BeginTable("SongTable", 5, flags, ImVec2(tableW, 450.0f)))
-
+                        if (BeginTable("SongTable", 5, flags, ImVec2(tableW, availableH + 30.0f)))
                         {
-
                             TableSetupColumn("#",        ImGuiTableColumnFlags_WidthFixed, 40.0f);
-                            TableSetupColumn("Title",    ImGuiTableColumnFlags_WidthFixed, 240.0f * sx);
-                            TableSetupColumn("Artist",   ImGuiTableColumnFlags_WidthFixed, 200.0f * sx);
-                            TableSetupColumn("Album",    ImGuiTableColumnFlags_WidthFixed, 200.0f * sx);
-                            TableSetupColumn("Duration", ImGuiTableColumnFlags_WidthFixed, 80.0f  * sx);
+                            TableSetupColumn("Title",    ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 240.0f * sx);
+                            TableSetupColumn("Artist",   ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 200.0f * sx);
+                            TableSetupColumn("Album",    ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 200.0f * sx);
+                            TableSetupColumn("Duration", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 80.0f  * sx);
+
+                            // This is what keeps the header fixed while scrolling songs
+                            TableSetupScrollFreeze(0, 1);
 
                             TableHeadersRow();
+
                             // Space between header and first song row
-                            TableNextRow(ImGuiTableRowFlags_None, 20.0f);
-                            
-                            ImGuiListClipper clipper;
-                            clipper.Begin((int)songlist.size());
+                            TableNextRow(ImGuiTableRowFlags_None, 23.0f);
 
                             std::string artist, album;
-
                             idk12123(foldiername, artist, album);
 
                             PushFont(MyFont);
+
                             for (int i = 0; i < songCount; i++)
                             {
                                 const auto& song = songlist[i];
                                 TableNextRow(ImGuiTableRowFlags_None, rowHeight);
-                                TableSetColumnIndex(0);
 
+                                TableSetColumnIndex(0);
                                 Text("%02d", i + 1);
 
                                 TableSetColumnIndex(1);
-                            
+                                
                                 std::string selID = "##sel" + std::to_string(i);
-
-                                if (Selectable(selID.c_str(), selectedIndex == i,
-                                    ImGuiSelectableFlags_SpanAllColumns,
-                                    ImVec2(0, rowHeight)))
+                                
+                                if (ImGui::Selectable(selID.c_str(), selectedIndex == i, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, rowHeight)))
                                 {
                                     selectedIndex = i;
+                                    
                                     if (!song.path.empty())
                                     {
                                         if (playerplay(song.path))
                                         {
-                                            printf("idk: %s\n", song.title.c_str()); // add them to the UI tommorow not as a printf
-
+                                            printf("idk: %s\n", song.title.c_str());
                                         }
+                                        
                                         else
                                         {
                                             printf("idk1%s\n", song.title.c_str());
                                         }
                                     }
-                                    else
-                                    {
-                                        // add error handling some day
-                                    }
                                 }
-                                    SameLine();
+                                
+                                SameLine();
                                 TextUnformatted(song.title.c_str());
 
                                 TableSetColumnIndex(2);
@@ -808,15 +806,15 @@ void Gui()
                                 TextUnformatted(album.c_str());
 
                                 TableSetColumnIndex(4);
-                                Text(""); // add a function in the future when i make it
+                                Text(""); 
                             }
-                            
+
                             PopStyleColor(6);
                             PopFont();
                             EndTable();
                         }
                     }
-                    
+                
                     else
                     {
                         SetCursorPos(ImVec2(255.0f, 355.0f));
@@ -884,55 +882,24 @@ void Gui()
 
                         Image((ImTextureID)albumTexture, ImVec2(200.0f, 200.0f));
                     }
-
-                    if (!scan || FoldierPath != searchpathformusic)
-                    {
-                        findimages();
-                        scan = true;
-                    }
-
-                    if (!takepath.empty())
+                    
+                    if (!songlist.empty())
                     {   
                         std::string artist, album;
-
                         idk12123(foldiername, artist, album);
 
                         SetCursorPos(ImVec2(494.0f, 170.0f));
-
                         PushFont(NULL, 24.0f);
-
                         Text("%s", album.c_str()); // searchfortitle.c_str() is for song name
-
                         PopFont();
 
-                        if (!artist.empty())
-                        {   
-                            PushFont(NULL, 16.0f);
-                            SetCursorPos(ImVec2(500.0f, 200.0f));
+                        PushFont(NULL, 16.0f);
+                        SetCursorPos(ImVec2(500.0f, 200.0f));
+                        Text("%s", artist.c_str());
+                        PopFont();
 
-                            Text("%s", artist.c_str());
-
-                            PopFont();
-                        }
-
-                        else 
-                        {   
-                            PushFont(NULL, 16.0f);
-                            SetCursorPos(ImVec2(500.0f, 200.0f));
-
-                            Text("No artist was found");
-                            
-                            PopFont();
-                        }
+                        
                     }   
-                    
-                    // Checking and displaying if we find the image 
-                    else if (takepath != "")
-                    {
-                        //SetCursorPos(ImVec2(300.0f, 155.0f));
-
-                        Text("No image was found");
-                    }
 
                     else
                     {
@@ -947,13 +914,15 @@ void Gui()
                         PushFont(NULL, 28.0f);
                         
                         Text("No song playing");
-    
+                        PopFont();
+                        
                         SetCursorPos(ImVec2(640.0f * scale_x, 220.0f * scale_y));
                         
                         PushFont(NULL, 16.0f);
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
 
                         Text("Add some songs to your library\n              to get started.");
+                        PopFont();
 
                         PopStyleColor();
 
@@ -962,6 +931,7 @@ void Gui()
                         PushFont(NULL, 18.0f);
 
                         Text("Your playlist is empty.");
+                        PopFont();
 
                         SetCursorPos(ImVec2(650.0f * scale_x, 610.0f * scale_y));
 
@@ -969,12 +939,9 @@ void Gui()
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
 
                         Text("Add some songs to get started.");
-                        
+                        PopFont();
+
                         PopStyleColor();
-                        PopFont();
-                        PopFont();
-                        PopFont();
-                        PopFont();
                     }
 
                     GetWindowDrawList()->AddLine(ImVec2(p.x + 223.0f, p.y + 80.0f), ImVec2(p.x + 3500.0f, p.y + 80.0f), 
@@ -1425,6 +1392,9 @@ void Gui()
                     {
                         FoldierPath = pathBuffer;
                         SaveMusicPath();
+                        songsLoaded = false;
+                        scan = false;
+                        songlist.clear();
                     }
                     
                     PopStyleVar();
