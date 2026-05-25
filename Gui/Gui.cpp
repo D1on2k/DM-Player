@@ -47,6 +47,15 @@ bool pathChanged = false;
 bool pause = false;
 static bool image = false;
 
+struct Playlist 
+{
+    std::string name;
+    std::vector<int> songokok;
+};
+
+static std::vector<Playlist> g_Playlists;
+static int plalistselectedindex = -1;
+
 RECT g_WindowRectWhenNormal = {0};
 RECT g_NormalRect = { 0, 0, 0, 0 };
 
@@ -209,7 +218,7 @@ void Gui()
         g_SwapChainOccluded = false;
 
         // Handle window resize
-        if (g_ResizeWidth != 430 && g_ResizeHeight != 330)
+        if (g_ResizeWidth != 0 && g_ResizeHeight != 0)
         {
             CleanupRenderTarget();
             g_pSwapChain->ResizeBuffers(0, g_ResizeWidth, g_ResizeHeight, DXGI_FORMAT_UNKNOWN, 0);
@@ -374,22 +383,6 @@ void Gui()
                 ImVec2 p = GetCursorScreenPos();
                 GetWindowDrawList()->AddLine(ImVec2(p.x + -7.0f, p.y + 17.0f), ImVec2(p.x + 222.0f, p.y + 17.0f), 
                 GetColorU32(ImGuiCol_Separator), 1.0f);
-
-                SetCursorPos(ImVec2(40.0f * scale_x, 380.0f * scale_y));
-                PushFont(NULL, 16.0f);
-
-                Text("No playlists yet");
-
-                PopFont();
-                        
-                SetCursorPos(ImVec2(20.0f * scale_x, 400.0f * scale_y));
-                PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
-                PushFont(NULL, 13.5f);
-
-                Text("Create a playlist to get started.");
-                        
-                PopStyleColor();
-                PopFont();
 
                 if (g_IsMaximized == false)
                 {
@@ -967,6 +960,7 @@ void Gui()
                     if(Button("Songs", ImVec2(53.0f, 20.0f)))
                     {
                         LibraryTabSystem = 0;
+                        plalistselectedindex = -1; // make sur its clear
                     }
 
                     SameLine(0.0f, 15.0f);
@@ -1032,55 +1026,126 @@ void Gui()
 
                     if (LibraryTabSystem == 0)
                     {
-                        // Put this to an else statement after i make the find music statement later
-
+                         // Put this to an else statement after i make the find music statement later
                         // SetCursorPos(ImVec2(690.0f, 300.0f));
 
                         SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
-                        
                         Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
 
                         SetCursorPos(ImVec2(690.0f * scale_x, 400.0f * scale_y));
                         PushFont(NULL, 28.0f); // Next put it 16
-
                         Text("You have no songs");
-
                         PopFont();
                         
                         SetCursorPos(ImVec2(685.0f * scale_x, 440.0f * scale_y));
                         PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
                         PushFont(NULL, 18.5f);
-
                         Text("Add some songs to your library\n             to get started.");
-                        
                         PopStyleColor();
                         PopFont();
 
-                        // Here is the end of the else statement
+                        // Here is the end of the else statement (i will add it pretty soon its almost copy pasting my past code)
                     }
 
                     else if (LibraryTabSystem == 1)
                     {
-                        // Put this to an else statement after i make the find music statement later
-                        SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
-                        Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
+                        // Put this to an else statement after i make the find music statement later future me i did it 
+                        bool viewlist = (plalistselectedindex >= 0);
 
-                        SetCursorPos(ImVec2(690.0f * scale_x, 400.0f * scale_y));
-                        PushFont(NULL, 28.0f); // Next put it 16
+                        if (viewlist)
+                        {
 
-                        Text("You have no albums");
+                            bool isitEmpty = true;
+                            
+                            if (isitEmpty)
+                            {
+                                SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
+                                Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
 
-                        PopFont();
+                                SetCursorPos(ImVec2(690.0f * scale_x, 400.0f * scale_y));
+                                PushFont(NULL, 28.0f); // Next put it 16
+
+                                Text("You have no albums");
+
+                                PopFont();
+                                
+                                SetCursorPos(ImVec2(685.0f * scale_x, 440.0f * scale_y));
+                                PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                                PushFont(NULL, 18.5f);
+
+                                Text("Add some songs to your library\n             to get started.");
+                                
+                                PopStyleColor();
+                                PopFont();
+                            }
+                        }
                         
-                        SetCursorPos(ImVec2(685.0f * scale_x, 440.0f * scale_y));
-                        PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
-                        PushFont(NULL, 18.5f);
+                        else
+                        {
+                            if (g_Playlists.empty())
+                            {
+                                SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
+                                Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
 
-                        Text("Add some songs to your library\n             to get started.");
-                        
-                        PopStyleColor();
-                        PopFont();
+                                SetCursorPos(ImVec2(690.0f * scale_x, 400.0f * scale_y));
+                                PushFont(NULL, 28.0f);
+                                Text("You have no playlists");
+                                PopFont();
+                            }
+                            
+                            else
+                            {   
+                                // Used LLM to help me with the positions since imgui doesnt have an automatic scale engine and my way didnt work also yea i debugged it it did have bugs and i tweaked it 
+                                float startX = 265.0f; 
+                                float startY = 180.0f * scale_y;
+                                
+                                float cardWidth = 140.0f;
+                                float cardHeight = 140.0f;
+                                float paddingX = 20.0f;
+                                float paddingY = 20.0f;
+                                
+                                float availableWidth = io.DisplaySize.x - startX - 40.0f;
+                                int maxColumns = (int)(availableWidth / (cardWidth + paddingX));
+                                if (maxColumns < 1) maxColumns = 1;
 
+                                for (size_t i = 0; i < g_Playlists.size(); i++)
+                                {
+                                    int column = i % maxColumns;
+                                    int row = i / maxColumns;
+
+                                    float currentX = startX + (column * (cardWidth + paddingX));
+                                    float currentY = startY + (row * (cardHeight + paddingY));
+
+                                    SetCursorPos(ImVec2(currentX, currentY));
+                                    
+                                    std::string hiddenButtonID = "##card" + std::to_string(i);
+                                    
+                                    PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+                                    PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.22f, 0.22f, 0.22f, 1.0f));
+                                    PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.12f, 0.12f, 0.12f, 1.0f));
+                                    PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
+
+                                    if (Button(hiddenButtonID.c_str(), ImVec2(cardWidth, cardHeight)))
+                                    {
+                                        plalistselectedindex = (int)i;
+                                    }
+                                    
+                                    PopStyleVar();
+                                    PopStyleColor(3);
+
+                                    SetCursorPos(ImVec2(currentX + (cardWidth / 2.0f) - 20.0f, currentY + 30.0f));
+                                    Image((ImTextureID)playlist1, ImVec2(40.0f, 40.0f));
+
+                                    ImVec2 textSize = CalcTextSize(g_Playlists[i].name.c_str()); // new thing i learnt i can calculate text to make it more actuate
+
+                                    float centeredX = currentX + (cardWidth / 2.0f) - (textSize.x / 2.0f);
+                                    float textY = currentY + 85.0f;
+
+                                    SetCursorPos(ImVec2(centeredX, textY));
+                                    TextUnformatted(g_Playlists[i].name.c_str());
+                                }
+                            }
+                        }
                         // Here is the end of the else statement
                     }
 
@@ -1445,15 +1510,52 @@ void Gui()
             PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
             PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
             PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+            PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
 
             SetCursorPos(ImVec2(190.0f, 297.0f));
             if (ImageButton("plus", (ImTextureID)plus, ImVec2(16.0f, 16.0f)))
             {
-                // Do something
+                // since std::string is fragile and it is easy of name conflict i did this with std because it was getting issues
+                Playlist newPlaylist;
+                newPlaylist.name = "Playlist " + std::to_string(g_Playlists.size() + 1);
+                g_Playlists.push_back(newPlaylist);
             }
-
+            
+            PopStyleVar();
             PopStyleColor(3);
             PopFont();
+
+            SetCursorPos(ImVec2(25.0f, 330.0f));
+
+            float newboxw = 200.0f; // here i added offesets for the box that will appear if + is being pressed
+            float newboxh = 385.0f;
+
+            if (BeginChild("newbox", ImVec2(newboxw, newboxh), ImGuiChildFlags_None, ImGuiWindowFlags_NoBackground))
+            {
+                PushStyleColor(ImGuiCol_Header, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+                PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
+                
+                PushFont(MyFont);
+
+                for (int i = 0; i < g_Playlists.size(); i++)
+                {
+                    const bool selecteds = (plalistselectedindex == i);
+
+                    if (Selectable(g_Playlists[i].name.c_str(), selecteds, ImGuiSelectableFlags_None, ImVec2(0, 0)))
+                    {
+                        selectedIndex = i;
+
+                        Tabsystem = 1;
+
+                        // test it later LibraryTabSystem = 0;
+                    }
+                }
+                
+                PopStyleColor(3);
+                PopFont();
+                EndChild();
+            }
         }
         
         EndGroup();
