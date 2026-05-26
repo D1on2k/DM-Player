@@ -1,5 +1,7 @@
 <div align="center">
 
+<img width="240" height="240" alt="DM-Player Github" src="https://github.com/user-attachments/assets/86db1806-13d8-4115-ad0a-d7b8cbb0bd4a" />
+
 # DM-Player
 
 <br>
