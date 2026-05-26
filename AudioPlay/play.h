@@ -24,36 +24,15 @@ SOFTWARE.
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <windows.h>
+#include <shlobj.h>
+#include <fstream>
 #include <string>
-#include <cstring>
 
-/*
-bool playerinitilize();
-bool playerplay(const string& filepath); // this
-bool playerpause();
-bool playerstop();
-bool playerifsongjustfinished();
-std::string playergettime(); // must put it as an std or it will get issues with 
-*/
+extern std::wstring FoldierPath;
+std::string WStringToString(const std::wstring& wstr);
+std::string WStringToUTF8(const std::wstring& wstr);
 
-extern float volume;
-
-bool playerinitilize();
-bool playerplay(const std::string& filepath);
-bool playerresume();
-bool playerpause();
-bool playerstop();
-bool playerifsongjustfinished();
-bool playersongprosomething(float& currentTime, float& totalTime);
-bool playerfindtime(float progress);
-bool setvolume(float okbradar);
-
-float getvolume();
-
-std::string playergettime();
-
-void asdasdcleanup();
-
-extern struct playmusic* g_playit;
+bool SelectMusicFolder();
+void LoadSavedMusicPath();
+void SaveMusicPath();
