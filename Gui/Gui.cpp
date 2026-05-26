@@ -399,7 +399,7 @@ void Gui()
 
                     // Clear the window with a rectangle 
                     //GetWindowDrawList()->AddRectFilled(ImVec2(260.0f, 70.0f), ImVec2(460.0f, 270.0f), IM_COL32(0, 0, 0, 255));
-                    if (!scan || FoldierPath != searchpathformusic)
+                    if (!scan || WStringToString(FoldierPath) != searchpathformusic)
                     {
                         if (albumTexture)
                         {
@@ -954,13 +954,11 @@ void Gui()
                     Text("Library");
 
                     PopFont();
-
+                    
                     SetCursorPos(ImVec2(265.0f, 120.0f));
-
                     if(Button("Songs", ImVec2(53.0f, 20.0f)))
                     {
                         LibraryTabSystem = 0;
-                        plalistselectedindex = -1; // make sur its clear
                     }
 
                     SameLine(0.0f, 15.0f);
@@ -976,7 +974,6 @@ void Gui()
                     {
                         LibraryTabSystem = 2;
                     }
-
                     // Band ade code till i find a solution to how to fix this 
                     if (g_IsMaximized == false)
                     {
@@ -1025,26 +1022,119 @@ void Gui()
                     GetColorU32(ImGuiCol_Separator), 1.0f);
 
                     if (LibraryTabSystem == 0)
-                    {
-                         // Put this to an else statement after i make the find music statement later
-                        // SetCursorPos(ImVec2(690.0f, 300.0f));
+                    {   
+                        if (!songlist.empty())
+                        {   
+                            ImVec2 ws = GetWindowSize();
+                            float sx = ws.x / 1200.0f;
 
-                        SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
-                        Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
+                            float tableStartY = -500.0f;
+                            float tableEndY   = ws.y - 800.0f;
+                            float availableH  = tableEndY - tableStartY - 0.0f;
 
-                        SetCursorPos(ImVec2(690.0f * scale_x, 400.0f * scale_y));
-                        PushFont(NULL, 28.0f); // Next put it 16
-                        Text("You have no songs");
-                        PopFont();
-                        
-                        SetCursorPos(ImVec2(685.0f * scale_x, 440.0f * scale_y));
-                        PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
-                        PushFont(NULL, 18.5f);
-                        Text("Add some songs to your library\n             to get started.");
-                        PopStyleColor();
-                        PopFont();
+                            int songCount    = (int)songlist.size();
+                            float rowHeight  = availableH / (float)songCount;
 
-                        // Here is the end of the else statement (i will add it pretty soon its almost copy pasting my past code)
+                            if (rowHeight > 20.0f) rowHeight = 20.0f;
+
+                            SetCursorPos(ImVec2(250.0f, 355.0f));
+                            PushStyleColor(ImGuiCol_TableHeaderBg,    ImVec4(0, 0, 0, 0));
+                            PushStyleColor(ImGuiCol_TableBorderLight, ImVec4(0, 0, 0, 0));
+                            PushStyleColor(ImGuiCol_TableBorderStrong,ImVec4(0, 0, 0, 0));
+                            PushStyleColor(ImGuiCol_HeaderHovered,    ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                            PushStyleColor(ImGuiCol_HeaderActive,     ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
+                            PushStyleColor(ImGuiCol_ButtonActive,     ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+
+                            ImGuiTableFlags flags =
+                                ImGuiTableFlags_SizingFixedFit |
+                                ImGuiTableFlags_BordersInnerH  |
+                                ImGuiTableFlags_ScrollY |
+                                ImGuiTableFlags_NoSavedSettings;
+
+                            float tableW = ws.x - 185.0f;
+                            
+                            SetCursorPos(ImVec2(270.0f, 200.0f));
+                            if (BeginTable("SongTable", 5, flags, ImVec2(tableW, availableH + 30.0f)))
+                            {
+                                TableSetupColumn("#",        ImGuiTableColumnFlags_WidthFixed, 40.0f);
+                                TableSetupColumn("Title",    ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 240.0f * sx);
+                                TableSetupColumn("Artist",   ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 200.0f * sx);
+                                TableSetupColumn("Album",    ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 200.0f * sx);
+                                TableSetupColumn("Duration", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 80.0f  * sx);
+
+                                TableSetupScrollFreeze(0, 1);
+                                TableHeadersRow();
+                                TableNextRow(ImGuiTableRowFlags_None, 23.0f);
+
+                                std::string artist, album;
+                                idk12123(foldiername, artist, album);
+
+                                PushFont(MyFont);
+                                for (int i = 0; i < songCount; i++)
+                                {
+                                    const auto& song = songlist[i];
+                                    
+                                    TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+                                    TableSetColumnIndex(0);
+                                    Text("%02d", i + 1);
+                                    TableSetColumnIndex(1);
+                                        
+                                    std::string selID = "##sel" + std::to_string(i);
+                                        
+                                    if (ImGui::Selectable(selID.c_str(), selectedIndex == i, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, rowHeight)))
+                                    {
+                                        selectedIndex = i;
+                                            
+                                        if (!song.path.empty())
+                                        {
+                                            if (playerplay(song.path))
+                                            {
+                                                printf("idk: %s\n", song.title.c_str());
+                                            }
+                                                
+                                            else
+                                            {
+                                                printf("idk1%s\n", song.title.c_str());
+                                            }
+                                        }
+                                    }
+                                        
+                                    SameLine();
+                                    TextUnformatted(song.title.c_str());
+
+                                    TableSetColumnIndex(2);
+                                    TextUnformatted(artist.c_str());
+                                    TableSetColumnIndex(3);
+                                    TextUnformatted(album.c_str());
+
+                                    TableSetColumnIndex(4);
+                                    Text(""); 
+                                }
+
+                                PopStyleColor(6);
+                                PopFont();
+                                EndTable();
+                            }
+                        }
+
+                        else
+                        {
+                            SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
+                            Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
+
+                            SetCursorPos(ImVec2(690.0f * scale_x, 400.0f * scale_y));
+                            PushFont(NULL, 28.0f); // Next put it 16
+                            Text("You have no songs");
+                            PopFont();
+                            
+                            SetCursorPos(ImVec2(685.0f * scale_x, 440.0f * scale_y));
+                            PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                            PushFont(NULL, 18.5f);
+                            Text("Add some songs to your library\n             to get started.");
+                            PopStyleColor();
+                            PopFont();
+                        }
+                        // Here is the end of the else statement (i will add it pretty soon its almost copy pasting my past code) yea it was copy paste
                     }
 
                     else if (LibraryTabSystem == 1)
@@ -1451,11 +1541,11 @@ void Gui()
                     PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.20f, 0.20f, 0.20f, 1.0f));
 
                     if (!FoldierPath.empty())
-                        strcpy_s(pathBuffer, sizeof(pathBuffer), FoldierPath.c_str());
+                        strcpy_s(pathBuffer, sizeof(pathBuffer), WStringToString(FoldierPath).c_str());
 
                     if (InputText("            ", pathBuffer, sizeof(pathBuffer)))
                     {
-                        FoldierPath = pathBuffer;
+                        FoldierPath = std::wstring(pathBuffer, pathBuffer + strlen(pathBuffer));
                         SaveMusicPath();
                         songsLoaded = false;
                         scan = false;
