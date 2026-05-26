@@ -67,7 +67,7 @@ void findimages()
 
     pair<string, string> parsedName = FolderName(foldiername);
 
-    searchpathformusic = FoldierPath;
+    searchpathformusic = WStringToString(FoldierPath);
 
     vector<string> extensions = { ".png", ".jpg", ".jpeg", ".webp" };
 
