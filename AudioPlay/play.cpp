@@ -41,6 +41,7 @@ struct playmusic
 
     bool isitplaying;
     bool songfinished;
+    bool loop;
 };
 
 playmusic* g_playit = nullptr; // future me it will be used a lot 
@@ -59,18 +60,33 @@ void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
     
     g_DecoderMutex.lock();
     ma_decoder_read_pcm_frames(&p->decoder, pOutput, frameCount, &readframes);
-    g_DecoderMutex.unlock();
 
     if (readframes < frameCount)
     {
-        ma_uint32 remain = frameCount - (ma_uint32)readframes;
-        size_t perframebytes = ma_get_bytes_per_frame(p->decoder.outputFormat, p->decoder.outputChannels);
+        if (p->loop)
+        {
+            ma_decoder_seek_to_pcm_frame(&p->decoder, 0);
+            
+            ma_uint32 remain = frameCount - (ma_uint32)readframes;
+            size_t perframebytes = ma_get_bytes_per_frame(p->decoder.outputFormat, p->decoder.outputChannels);
+            char* pRemainingOutput = (char*)pOutput + (readframes * perframebytes);
+            
+            ma_uint64 extraFramesRead = 0;
+            ma_decoder_read_pcm_frames(&p->decoder, pRemainingOutput, remain, &extraFramesRead);
+        }
+        
+        else
+        {
+            ma_uint32 remain = frameCount - (ma_uint32)readframes;
+            size_t perframebytes = ma_get_bytes_per_frame(p->decoder.outputFormat, p->decoder.outputChannels);
 
-        memset((char*) pOutput + readframes * perframebytes, 0, remain * perframebytes);
+            memset((char*)pOutput + readframes * perframebytes, 0, remain * perframebytes);
 
-        p->songfinished = true;
-        p->isitplaying = false;
+            p->songfinished = true;
+            p->isitplaying = false;
+        }
     }
+    g_DecoderMutex.unlock();
 
     (void)pInput;
 }
@@ -86,6 +102,7 @@ bool playerinitilize()
     g_playit = new playmusic();
     g_playit->isitplaying = false;
     g_playit->songfinished = false;
+    g_playit->loop = false;
 
     return true;
 }
@@ -105,7 +122,11 @@ bool playerplay(const string& filepath)
         g_playit->isitplaying = false;
     }
 
-    if (ma_decoder_init_file(filepath.c_str(), NULL, &g_playit->decoder) != MA_SUCCESS)
+    int wsize = MultiByteToWideChar(CP_UTF8, 0, filepath.c_str(), -1, NULL, 0);
+    std::wstring wfilepath(wsize, 0);
+    MultiByteToWideChar(CP_UTF8, 0, filepath.c_str(), -1, &wfilepath[0], wsize);
+
+    if (ma_decoder_init_file_w(wfilepath.c_str(), NULL, &g_playit->decoder) != MA_SUCCESS)
     {
         printf("Couldnt load file: %s \n", filepath.c_str());
         return false;
@@ -155,6 +176,29 @@ bool playerresume()
     
     g_playit->isitplaying = true;
     
+    return true;
+}
+
+bool playerrepeat()
+{
+    if (g_playit == nullptr)
+    {
+        return false;
+    }
+
+    if (!g_playit->isitplaying)
+    {
+        return false;
+    }
+
+    g_DecoderMutex.lock();
+
+    g_playit->loop = !g_playit->loop;
+
+    ma_data_source_set_looping((ma_data_source*)&g_playit->decoder, g_playit->loop ? MA_TRUE : MA_FALSE);
+
+    g_DecoderMutex.unlock();
+
     return true;
 }
 
