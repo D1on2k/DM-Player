@@ -22,344 +22,85 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#define MINIAUDIO_IMPLEMENTATION
-
-#include "Includes/miniaudio.c"
-#include "play.h"
-#include <mutex>
+#include "select_path.h"
 
 using namespace std;
 
-std::mutex g_DecoderMutex;
+std::wstring FoldierPath = L"";
 
-struct playmusic
+// Helper to convert wide string to normal string (we need this sometimes)
+string WStringToString(const wstring& wstr)
 {
-    ma_decoder decoder;
-    ma_device device;
-
-    string csongpath;
-
-    bool isitplaying;
-    bool songfinished;
-    bool loop;
-};
-
-playmusic* g_playit = nullptr; // future me it will be used a lot 
-
-void data_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
-{
-    playmusic* p = (playmusic*) pDevice->pUserData;
-
-    if (p == NULL || !p->isitplaying)
-    {
-        memset(pOutput, 0, frameCount * ma_get_bytes_per_frame(ma_format_f32, 2));
-        return;
-    }
-
-    ma_uint64 readframes = 0;
+    if (wstr.empty()) return "";
     
-    g_DecoderMutex.lock();
-    ma_decoder_read_pcm_frames(&p->decoder, pOutput, frameCount, &readframes);
+    int size = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
+    string result(size, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &result[0], size, NULL, NULL);
+    result.resize(size - 1);
+    return result;
+}
 
-    if (readframes < frameCount)
+
+bool SelectMusicFolder()
+{
+    // Setup the folder dialog
+    BROWSEINFOW bi = { 0 };
+    bi.lpszTitle = L"Select Folder";
+    bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE; // Nice looking dialog
+
+    // Open the folder picker
+    LPITEMIDLIST pidl = SHBrowseForFolderW(&bi);
+    
+    if (pidl != nullptr)
     {
-        if (p->loop)
-        {
-            ma_decoder_seek_to_pcm_frame(&p->decoder, 0);
-            
-            ma_uint32 remain = frameCount - (ma_uint32)readframes;
-            size_t perframebytes = ma_get_bytes_per_frame(p->decoder.outputFormat, p->decoder.outputChannels);
-            char* pRemainingOutput = (char*)pOutput + (readframes * perframebytes);
-            
-            ma_uint64 extraFramesRead = 0;
-            ma_decoder_read_pcm_frames(&p->decoder, pRemainingOutput, remain, &extraFramesRead);
-        }
+        wchar_t path[MAX_PATH] = { 0 };
         
-        else
+        if (SHGetPathFromIDListW(pidl, path))
         {
-            ma_uint32 remain = frameCount - (ma_uint32)readframes;
-            size_t perframebytes = ma_get_bytes_per_frame(p->decoder.outputFormat, p->decoder.outputChannels);
-
-            memset((char*)pOutput + readframes * perframebytes, 0, remain * perframebytes);
-
-            p->songfinished = true;
-            p->isitplaying = false;
+            FoldierPath = path; // Save the selected path
+            SaveMusicPath(); // Save it to file so it remembers next time
+            CoTaskMemFree(pidl);
+            return true;
         }
-    }
-    g_DecoderMutex.unlock();
-
-    (void)pInput;
-}
-
-bool playerinitilize()
-{
-    if (g_playit != nullptr)
-    {
-        return true;
-    }
-
-    // yes we will do manuall memory management the good old way no new smart pointers 
-    g_playit = new playmusic();
-    g_playit->isitplaying = false;
-    g_playit->songfinished = false;
-    g_playit->loop = false;
-
-    return true;
-}
-
-bool playerplay(const string& filepath)
-{
-    if (g_playit == nullptr)
-    {
-        return false;
-    }
-
-    if (g_playit->isitplaying)
-    {
-        ma_device_stop(&g_playit->device);
-        ma_device_uninit(&g_playit->device);
-        ma_decoder_uninit(&g_playit->decoder);
-        g_playit->isitplaying = false;
-    }
-
-    int wsize = MultiByteToWideChar(CP_UTF8, 0, filepath.c_str(), -1, NULL, 0);
-    std::wstring wfilepath(wsize, 0);
-    MultiByteToWideChar(CP_UTF8, 0, filepath.c_str(), -1, &wfilepath[0], wsize);
-
-    if (ma_decoder_init_file_w(wfilepath.c_str(), NULL, &g_playit->decoder) != MA_SUCCESS)
-    {
-        printf("Couldnt load file: %s \n", filepath.c_str());
-        return false;
-    }
-
-    ma_device_config deviceConfig = ma_device_config_init(ma_device_type_playback);
-    deviceConfig.playback.format = g_playit->decoder.outputFormat;
-    deviceConfig.playback.channels = g_playit->decoder.outputChannels;
-    deviceConfig.sampleRate = g_playit->decoder.outputSampleRate;
-    deviceConfig.dataCallback = data_callback;
-    deviceConfig.pUserData = g_playit;
-
-    if (ma_device_init(NULL, &deviceConfig, &g_playit->device) != MA_SUCCESS)
-    {
-        printf("Failed to open playback device.\n");
-        ma_decoder_uninit(&g_playit->decoder);
-        return false;
-    }
-
-    if (ma_device_start(&g_playit->device) != MA_SUCCESS)
-    {
-        printf("Failed to start playback.\n");
-        ma_device_uninit(&g_playit->device);
-        ma_decoder_uninit(&g_playit->decoder);
-        return false;
-    }
-
-    g_playit->csongpath = filepath;
-    g_playit->isitplaying = true;
-    g_playit->songfinished = false;
-
-    ma_device_set_master_volume(&g_playit->device, volume); // this is actually a crusial line yes i will comment it dont mind me 
-                                                            // so if we didnt had this line the volume would restart all time and just be a bad experience with this fix we can have our heads calm.
-
-    printf("Successfully started: %s\n", filepath.c_str());
-    return true;
-
-    // here i shouldve add a thing that says time but i will add it on the ui later
-}
-
-bool playerresume()
-{
-    if (g_playit == nullptr) 
-    {
-        return false;
+        CoTaskMemFree(pidl);
     }
     
-    g_playit->isitplaying = true;
-    
-    return true;
-}
-
-bool playerrepeat()
-{
-    if (g_playit == nullptr)
-    {
-        return false;
-    }
-
-    if (!g_playit->isitplaying)
-    {
-        return false;
-    }
-
-    g_DecoderMutex.lock();
-
-    g_playit->loop = !g_playit->loop;
-
-    ma_data_source_set_looping((ma_data_source*)&g_playit->decoder, g_playit->loop ? MA_TRUE : MA_FALSE);
-
-    g_DecoderMutex.unlock();
-
-    return true;
-}
-
-bool playerpause()
-{
-    if (g_playit == nullptr)
-    {
-        return false;
-    }
-
-    g_playit->isitplaying = false;
-    
-    return true;
-}
-
-// here is the good part optimize it so if nothing is loaded it will stop 
-bool playerstop()
-{
-    if (g_playit == nullptr)
-    {
-        return false;
-    }
-
-    if (g_playit->isitplaying)
-    {
-        ma_device_stop(&g_playit->device);
-        ma_device_uninit(&g_playit->device);
-        ma_decoder_uninit(&g_playit->decoder);
-        g_playit->isitplaying = false;
-    }
-
-    return true;
-}
-
-std::string playergettime()
-{
-    if (g_playit == nullptr)
-    {
-        return "";
-    }
-
-    return g_playit->csongpath;
-}
-
-bool playerifsongjustfinished()
-{
-    if (g_playit == nullptr)
-    {
-        return false;
-    }
-
-    if (g_playit->songfinished)
-    {
-        g_playit->songfinished = false;
-        
-        ma_device_stop(&g_playit->device);
-        ma_device_uninit(&g_playit->device);
-
-        return true;
-    }
-
     return false;
 }
 
-bool playersongprosomething(float& currentTime, float& totalTime)
+void SaveMusicPath()
 {
-    currentTime = 0.0f;
-    totalTime = 0.0f;
-
-    if (g_playit == nullptr || !g_playit->isitplaying)
-    {
-        return false;
-    }
-
-    g_DecoderMutex.lock();
-
-    ma_uint64 cursor = 0;
-    ma_decoder_get_cursor_in_pcm_frames(&g_playit->decoder, &cursor);
-
-    currentTime = (float)cursor / g_playit->decoder.outputSampleRate;
-
-    ma_uint64 length = 0;
-    if (ma_decoder_get_length_in_pcm_frames(&g_playit->decoder, &length) == MA_SUCCESS)
-    {
-        totalTime = (float)length / g_playit->decoder.outputSampleRate;
-    }
-
-    g_DecoderMutex.unlock();
-
-    return true;
-}
-
-bool playerfindtime(float progress)
-{
-    if (g_playit == nullptr)
-    {
-        return false;
-    }
-
-    if (progress < 0.0f) progress = 0.0f;
-    if (progress > 1.0f) progress = 1.0f;
-
-    g_DecoderMutex.lock();
-
-    ma_uint64 length = 0;
-    if (ma_decoder_get_length_in_pcm_frames(&g_playit->decoder, &length) != MA_SUCCESS)
-    {
-        g_DecoderMutex.unlock();
-        return false;
-    }
-
-    ma_uint64 targetFrame = (ma_uint64)(progress * length);
-
-    bool success = (ma_decoder_seek_to_pcm_frame(&g_playit->decoder, targetFrame) == MA_SUCCESS);
-
-    g_DecoderMutex.unlock();
-
-    return success;
-}
-
-float volume = 0.5f; // I tried with 1.0 it was an ear rape defenetly not recomnded
-
-bool setvolume(float okbradar)
-{
-    if (g_playit == nullptr) 
-    {
-        return false;
-    }
-
-    if (volume < 0.0f) volume = 0.0f;
-    if (volume > 1.0f) volume = 1.0f;
-
-    volume = okbradar;
-
-    ma_device_set_master_volume(&g_playit->device, volume);
+    std::wofstream file("music_path.txt"); 
     
-    return true;
+    if (file.is_open())
+    {
+        file << FoldierPath;
+        file.close();
+    }
 }
 
-float getvolume()
+void LoadSavedMusicPath()
 {
-    if (g_playit == nullptr) 
+    std::wifstream file("music_path.txt"); 
+    
+    if (file.is_open())
     {
-        return 1.0f;
+        std::getline(file, FoldierPath); 
+        file.close();
     }
-    
-    ma_device_get_master_volume(&g_playit->device, &volume);
-    
-    return volume;
 }
-
-void asdasdcleanup()
+// used llm here to convert i couldnt find a way to get non english characters working
+std::string WStringToUTF8(const std::wstring& wstr)
 {
-    if (g_playit != nullptr)
-    {
-        if (g_playit->isitplaying)
-        {
-            playerstop();
-        }
-
-        delete g_playit; // alsmost forgot this damn thing
-        g_playit = nullptr;
-    }
+    if (wstr.empty()) return "";
+    
+    int size = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, NULL, 0, NULL, NULL);
+    if (size <= 0) return "";
+    
+    std::string result(size, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &result[0], size, NULL, NULL);
+    
+    // Resize to trim the null-terminator safely
+    result.resize(size - 1);
+    return result;
 }
