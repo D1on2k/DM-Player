@@ -6,7 +6,7 @@
 
 <br>
 
-A light weight media player using Dear ImGui as a framework DirectX 11, win 32 API for window functions and MiniAudio for backend.
+A light weight music player using Dear ImGui as a framework DirectX 11, win 32 API for window functions and MiniAudio for backend.
 
 <br>
 
