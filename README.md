@@ -6,7 +6,7 @@
 
 <br>
 
-A light weight music player using Dear ImGui as a framework DirectX 11, win 32 API for window functions and MiniAudio for backend.
+A lightweight from scratch music player using Dear ImGui, DirectX 11, Windows 32 API for window functions and MiniAudio for backend.
 
 <br>
 
@@ -15,12 +15,6 @@ A light weight music player using Dear ImGui as a framework DirectX 11, win 32 A
 </div>
 
 </div>
-
----
-
-# STILL UNDER DEVELOPMENT
-
-Backend has been offcially fully finished the only thing left is to apply it on the frontend polish the UI and be done with this project also a website is being developed.
 
 ---
 ## Features
