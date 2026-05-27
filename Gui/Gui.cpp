@@ -64,6 +64,7 @@ string previousPath = "";
 int Tabsystem = 0;
 int LibraryTabSystem = 0;
 int selectedIndex = -1;
+int ActiveFolderViewIndex = -1;
 
 char HoldSearch[128] = "";
 char pathBuffer[512] = {};
@@ -71,6 +72,7 @@ char IAMTIRED[256] = "";
 
 std::vector<SongDisplay> songlist;
 std::vector<std::string> songtitles;
+std::vector<FolderDisplay> folderTabList;
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -394,6 +396,273 @@ void Gui()
                     SetCursorPos(ImVec2(970.0f * scale_xyzx, 128.0f));
                 }
 
+                SetCursorPos(ImVec2(255.0f, 420.0f));
+                PushFont(MyFont);
+
+                ldsngsifneeded();
+
+                PopFont();
+
+                // note from yesterday this is the float bar i will use tommorow 
+                // sliderfloat("name", &volume, 0.0f, 1.0f);
+                // setvolume(volume)
+                                
+                // note from the tommorow me which was the yesterday comment: Thank you old self
+                SetCursorPos(ImVec2(0.0f, 715.0f * scale_y));
+                    
+                Separator();
+
+                SetCursorPos(ImVec2(840.0f * scale_xyzc,750.0f * scale_y));
+                    
+                Image((ImTextureID)volume2, ImVec2(20.0f, 20.0f));
+
+                SetCursorPos(ImVec2(200.0f * scale_xy, 750.0f * scale_y));
+
+                if (ImageButton("##playlastsong",(ImTextureID)lastsong, ImVec2(16.0f, 16.0f)))
+                {
+                    if (!songlist.empty())
+                    {
+                           if (selectedIndex > 0)
+                           {
+                            selectedIndex--;
+                        }
+
+                        else
+                        {
+                            selectedIndex = (int)songlist.size() - 1; // make it so if it reaches the last just make it loop
+                        }
+
+                        playerplay(songlist[selectedIndex].path);
+                        pause = false;
+                    }
+                }
+
+                SameLine(0.0f, 15.0f);
+
+                // big brain move so if the user wants to pause or play we have to make the icon change dynamically too so i came to this solve
+
+                ImTextureID bigbrainmove;
+
+                if (pause)
+                {
+                    bigbrainmove = (ImTextureID)playsng;
+                }
+
+                else
+                {
+                    bigbrainmove = (ImTextureID)pausems;
+                }
+
+                if (ImageButton("##play", bigbrainmove, ImVec2(16.0f, 16.0f))) // found on stack overflow i can use ## instade of just adding spaces
+                {
+                    if (selectedIndex >= 0 && selectedIndex < songlist.size())
+                    {
+                        if (pause)
+                        {
+                            playerresume();
+                            pause = false;
+                        }
+
+                        else
+                        {
+                            playerpause();
+                            pause = true;
+                        }
+                    }
+
+                    else if (!songlist.empty())
+                    {
+                        selectedIndex = 0;
+                        playerplay(songlist[0].path);
+                        pause = false;
+                    }
+                }
+
+                SameLine(0.0f, 14.0f);
+
+                if (ImageButton("##nextbutton", (ImTextureID)next, ImVec2(16.0f, 16.0f)))
+                {
+                    if (!songlist.empty())
+                    {
+                        if (selectedIndex < (int)songlist.size() - 1)
+                        {
+                            selectedIndex++;
+                        }
+
+                        else
+                        {
+                            selectedIndex = 0;
+                        }
+
+                        playerplay(songlist[selectedIndex].path);
+                        pause = false;
+                    }
+                }
+                    
+                SameLine(0.0f, 10.0f);
+
+                ImTextureID okok;
+                static bool loopingorno = false;
+
+                if (loopingorno)
+                {
+                    okok = (ImTextureID)loop1;
+                }
+                    
+                else
+                {
+                    okok = (ImTextureID)loop;
+                }
+
+                if (ImageButton("##loopbutton", (ImTextureID)okok, ImVec2(18.0f, 18.0f)))
+                {   
+                    loopingorno = !loopingorno; // make it change the boolean
+                    playerrepeat();
+                }
+
+                // make it that was so if the song finishes to play the next
+                // used LLM to debug this statement too when i made my version it just auto crashed when a song had finished
+                if (playerifsongjustfinished())
+                {
+                    if (!songlist.empty())
+                    {
+                        selectedIndex = (selectedIndex + 1) % (int)songlist.size();
+                        
+                        Sleep(50);  
+                        
+                        if (playerplay(songlist[selectedIndex].path))
+                        {
+                            pause = false;
+                        }
+                        
+                        else
+                        {
+                            selectedIndex = -1;
+                        }
+                    }
+                }
+                    
+                float current = 0.0f;
+                float total = 0.0f;
+                playersongprosomething(current, total);
+
+                SetCursorPos(ImVec2(300.0f * scale_xy, 750.0f * scale_y));
+                Text("%s", FormatTime(current).c_str());
+
+                SameLine(0.0f, 8.0f);
+                    
+                SetNextItemWidth(300.0f);
+
+                // Used LLM to help me here
+                float currentTime = 0.0f;
+                float totalTime = 0.0f;
+
+                // call the function so we dont lose time
+                bool isSongPlaying = playersongprosomething(currentTime, totalTime);
+
+                if (isSongPlaying || g_playit != nullptr)
+                {
+                    static float staticProgress = 0.0f;
+                    static bool isDragging = false;
+
+                    // if the user is not draging the bar we will make the bar move normally
+                    if (!isDragging)
+                    {
+                        staticProgress = (totalTime > 0.0f) ? (currentTime / totalTime) : 0.0f;
+                    }
+
+                    SetCursorPos(ImVec2(300.0f * scale_xy, 750.0f * scale_y));
+                        
+                    // make it show the draged time
+                    if (isDragging)
+                    {
+                        Text("%s", FormatTime(staticProgress * totalTime).c_str());
+                    }
+                    else
+                    {
+                        Text("%s", FormatTime(currentTime).c_str());
+                    }
+
+                    SameLine(0.0f, 8.0f);
+
+                    SetNextItemWidth(300.0f);
+                    PushStyleVar(ImGuiStyleVar_GrabRounding, 999.0f); // make it as round as i can
+                    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 2.0f));
+                    PushStyleVar(ImGuiStyleVar_GrabMinSize, 26.0f); // thank god vs code knows every style var i wouldnt go searching for it online 
+                        
+                    PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                    PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                    PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                    PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+                    PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+                        
+                    // this returns true while the user is sliding
+                    if (SliderFloat("##findtime", &staticProgress, 0.0f, 1.0f, ""))
+                    {
+                        isDragging = true;
+                    }
+
+                    if (IsItemDeactivatedAfterEdit())
+                    {
+                        playerfindtime(staticProgress);
+                        isDragging = false; 
+                    }
+
+                    SameLine(0.0f, 8.0f);
+                    Text("%s", FormatTime(totalTime).c_str());
+
+                    PopStyleVar(3);
+                    PopStyleColor(5);
+                }
+                    
+                else
+                {
+                    SetCursorPos(ImVec2(300.0f * scale_xy, 750.0f * scale_y));
+                    Text("00:00");
+
+                    SameLine(0.0f, 8.0f);
+                    SetNextItemWidth(300.0f);
+                        
+                    float dummy = 0.0f;
+                    SliderFloat("##idk", &dummy, 0.0f, 1.0f, "");
+                        
+                    SameLine(0.0f, 8.0f);
+                    Text("00:00");
+                }
+
+                SetCursorPos(ImVec2(860.0f * scale_xyzc, 750.0f * scale_y));
+                    
+                /*
+                My research notes:
+                    
+                ImGuiCol_SliderGrab / Color of the slider's grab handle
+                ImGuiCol_SliderGrabActive / Color of the grab handle when active
+                ImGuiStyle::GrabMinSize / Minimum size of the grab handle
+                ImGuiStyle::FramePadding / Padding around the slider
+                    
+                // I made this but i dont know exactly how to use it
+                //IMGUI_API bool grabthingrounding(const char* label, float* p_value, float v_min, float v_max, float v_step=50.f);
+                */
+
+                PushStyleVar(ImGuiStyleVar_GrabRounding, 999.0f); // make it as round as i can
+                PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 2.0f));
+                PushStyleVar(ImGuiStyleVar_GrabMinSize, 26.0f); // thank god vs code knows every style var i wouldnt go searching for it online 
+                    
+                PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
+                PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+                PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
+                    
+                SetNextItemWidth(200.0f);
+                if (SliderFloat("", &volume, 0.0f, 1.0f, "")) // will add an icon maybe not ImGuiSliderFlags_NoRoundToFormat
+                {
+                    setvolume(volume);
+                }
+                    
+                PopStyleVar(3);
+                PopStyleColor(5);
+
                 if (Tabsystem == 0) 
                 {   
 
@@ -438,273 +707,7 @@ void Gui()
                         Image((ImTextureID)albemt, ImVec2(200.0f, 200.0f));
                     }
 
-                    SetCursorPos(ImVec2(255.0f, 420.0f));
-                    PushFont(MyFont);
-
-                    ldsngsifneeded();
-
-                    PopFont();
-
-                    // note from yesterday this is the float bar i will use tommorow 
-                    // sliderfloat("name", &volume, 0.0f, 1.0f);
-                    // setvolume(volume)
-                                
-                    // note from the tommorow me which was the yesterday comment: Thank you old self
-                    SetCursorPos(ImVec2(0.0f, 715.0f * scale_y));
                     
-                    Separator();
-
-                    SetCursorPos(ImVec2(840.0f * scale_xyzc,750.0f * scale_y));
-                    
-                    Image((ImTextureID)volume2, ImVec2(20.0f, 20.0f));
-
-                    SetCursorPos(ImVec2(200.0f * scale_xy, 750.0f * scale_y));
-
-                    if (ImageButton("##playlastsong",(ImTextureID)lastsong, ImVec2(16.0f, 16.0f)))
-                    {
-                        if (!songlist.empty())
-                        {
-                            if (selectedIndex > 0)
-                            {
-                                selectedIndex--;
-                            }
-
-                            else
-                            {
-                                selectedIndex = (int)songlist.size() - 1; // make it so if it reaches the last just make it loop
-                            }
-
-                            playerplay(songlist[selectedIndex].path);
-                            pause = false;
-                        }
-                    }
-
-                    SameLine(0.0f, 15.0f);
-
-                    // big brain move so if the user wants to pause or play we have to make the icon change dynamically too so i came to this solve
-
-                    ImTextureID bigbrainmove;
-
-                    if (pause)
-                    {
-                        bigbrainmove = (ImTextureID)playsng;
-                    }
-
-                    else
-                    {
-                        bigbrainmove = (ImTextureID)pausems;
-                    }
-
-                    if (ImageButton("##play", bigbrainmove, ImVec2(16.0f, 16.0f))) // found on stack overflow i can use ## instade of just adding spaces
-                    {
-                        if (selectedIndex >= 0 && selectedIndex < songlist.size())
-                        {
-                            if (pause)
-                            {
-                                playerresume();
-                                pause = false;
-                            }
-
-                            else
-                            {
-                                playerpause();
-                                pause = true;
-                            }
-                        }
-
-                        else if (!songlist.empty())
-                        {
-                            selectedIndex = 0;
-                            playerplay(songlist[0].path);
-                            pause = false;
-                        }
-                    }
-
-                    SameLine(0.0f, 14.0f);
-
-                    if (ImageButton("##nextbutton", (ImTextureID)next, ImVec2(16.0f, 16.0f)))
-                    {
-                        if (!songlist.empty())
-                        {
-                            if (selectedIndex < (int)songlist.size() - 1)
-                            {
-                                selectedIndex++;
-                            }
-
-                            else
-                            {
-                                selectedIndex = 0;
-                            }
-
-                            playerplay(songlist[selectedIndex].path);
-                            pause = false;
-                        }
-                    }
-                    
-                    SameLine(0.0f, 10.0f);
-
-                    ImTextureID okok;
-                    static bool loopingorno = false;
-
-                    if (loopingorno)
-                    {
-                        okok = (ImTextureID)loop1;
-                    }
-                    
-                    else
-                    {
-                        okok = (ImTextureID)loop;
-                    }
-
-                    if (ImageButton("##loopbutton", (ImTextureID)okok, ImVec2(18.0f, 18.0f)))
-                    {   
-                        loopingorno = !loopingorno; // make it change the boolean
-                        playerrepeat();
-                    }
-
-                    // make it that was so if the song finishes to play the next
-                    // used LLM to debug this statement too when i made my version it just auto crashed when a song had finished
-                    if (playerifsongjustfinished())
-                    {
-                        if (!songlist.empty())
-                        {
-                            selectedIndex = (selectedIndex + 1) % (int)songlist.size();
-                            
-                            Sleep(50);  
-                            
-                            if (playerplay(songlist[selectedIndex].path))
-                            {
-                                pause = false;
-                            }
-                            
-                            else
-                            {
-                                selectedIndex = -1;
-                            }
-                        }
-                    }
-                    
-                    float current = 0.0f;
-                    float total = 0.0f;
-                    playersongprosomething(current, total);
-
-                    SetCursorPos(ImVec2(300.0f * scale_xy, 750.0f * scale_y));
-                    Text("%s", FormatTime(current).c_str());
-
-                    SameLine(0.0f, 8.0f);
-                    
-                    SetNextItemWidth(300.0f);
-
-                    // Used LLM to help me here
-                    float currentTime = 0.0f;
-                    float totalTime = 0.0f;
-
-                    // call the function so we dont lose time
-                    bool isSongPlaying = playersongprosomething(currentTime, totalTime);
-
-                    if (isSongPlaying || g_playit != nullptr)
-                    {
-                        static float staticProgress = 0.0f;
-                        static bool isDragging = false;
-
-                        // if the user is not draging the bar we will make the bar move normally
-                        if (!isDragging)
-                        {
-                            staticProgress = (totalTime > 0.0f) ? (currentTime / totalTime) : 0.0f;
-                        }
-
-                        SetCursorPos(ImVec2(300.0f * scale_xy, 750.0f * scale_y));
-                        
-                        // make it show the draged time
-                        if (isDragging)
-                        {
-                            Text("%s", FormatTime(staticProgress * totalTime).c_str());
-                        }
-                        else
-                        {
-                            Text("%s", FormatTime(currentTime).c_str());
-                        }
-
-                        SameLine(0.0f, 8.0f);
-                        SetNextItemWidth(300.0f);
-
-                        PushStyleVar(ImGuiStyleVar_GrabRounding, 999.0f); // make it as round as i can
-                        PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 2.0f));
-                        PushStyleVar(ImGuiStyleVar_GrabMinSize, 26.0f); // thank god vs code knows every style var i wouldnt go searching for it online 
-                        
-                        PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
-                        PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
-                        PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
-                        PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
-                        PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
-                        
-                        // this returns true while the user is sliding
-                        if (SliderFloat("##findtime", &staticProgress, 0.0f, 1.0f, ""))
-                        {
-                            isDragging = true;
-                        }
-
-                        if (IsItemDeactivatedAfterEdit())
-                        {
-                            playerfindtime(staticProgress);
-                            isDragging = false; 
-                        }
-
-                        SameLine(0.0f, 8.0f);
-                        Text("%s", FormatTime(totalTime).c_str());
-
-                        PopStyleVar(3);
-                        PopStyleColor(5);
-                    }
-                    
-                    else
-                    {
-                        SetCursorPos(ImVec2(300.0f * scale_xy, 750.0f * scale_y));
-                        Text("00:00");
-
-                        SameLine(0.0f, 8.0f);
-                        SetNextItemWidth(300.0f);
-                        
-                        float dummy = 0.0f;
-                        SliderFloat("##idk", &dummy, 0.0f, 1.0f, "");
-                        
-                        SameLine(0.0f, 8.0f);
-                        Text("00:00");
-                    }
-
-                    SetCursorPos(ImVec2(860.0f * scale_xyzc, 750.0f * scale_y));
-                    
-                    /*
-                    My research notes:
-                    
-                    ImGuiCol_SliderGrab / Color of the slider's grab handle
-                    ImGuiCol_SliderGrabActive / Color of the grab handle when active
-                    ImGuiStyle::GrabMinSize / Minimum size of the grab handle
-                    ImGuiStyle::FramePadding / Padding around the slider
-                    
-                    // I made this but i dont know exactly how to use it
-                    //IMGUI_API bool grabthingrounding(const char* label, float* p_value, float v_min, float v_max, float v_step=50.f);
-                    */
-
-                    PushStyleVar(ImGuiStyleVar_GrabRounding, 999.0f); // make it as round as i can
-                    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 2.0f));
-                    PushStyleVar(ImGuiStyleVar_GrabMinSize, 26.0f); // thank god vs code knows every style var i wouldnt go searching for it online 
-                    
-                    PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
-                    PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
-                    PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.30f, 0.30f, 0.30f, 1.0f));
-                    PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
-                    PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.45f, 0.45f, 0.45f, 1.0f));
-                    
-                    SetNextItemWidth(200.0f);
-                    if (SliderFloat("", &volume, 0.0f, 1.0f, "")) // will add an icon maybe not ImGuiSliderFlags_NoRoundToFormat
-                    {
-                        setvolume(volume);
-                    }
-                    
-                    PopStyleVar(3);
-                    PopStyleColor(5);
-
                     if (!songlist.empty())
                     {   
                         // Used help from LLM here I couldn't find a way to put the name under name album under album etc but i did tweak it a bit my self.
@@ -959,6 +962,7 @@ void Gui()
                     if(Button("Songs", ImVec2(53.0f, 20.0f)))
                     {
                         LibraryTabSystem = 0;
+                        ActiveFolderViewIndex = -1;
                     }
 
                     SameLine(0.0f, 15.0f);
@@ -966,6 +970,7 @@ void Gui()
                     if(Button("Albums", ImVec2(55.0f, 23.0f)))
                     {
                         LibraryTabSystem = 1;
+                        ActiveFolderViewIndex = -1;
                     }
 
                     SameLine(0.0f, 15.0f);
@@ -973,6 +978,7 @@ void Gui()
                     if(Button("Foldiers", ImVec2(57.0f, 25.0f)))
                     {
                         LibraryTabSystem = 2;
+                        ActiveFolderViewIndex = -1;
                     }
                     // Band ade code till i find a solution to how to fix this 
                     if (g_IsMaximized == false)
@@ -1023,101 +1029,7 @@ void Gui()
 
                     if (LibraryTabSystem == 0)
                     {   
-                        if (!songlist.empty())
-                        {   
-                            ImVec2 ws = GetWindowSize();
-                            float sx = ws.x / 1200.0f;
-
-                            float tableStartY = -500.0f;
-                            float tableEndY   = ws.y - 800.0f;
-                            float availableH  = tableEndY - tableStartY - 0.0f;
-
-                            int songCount    = (int)songlist.size();
-                            float rowHeight  = availableH / (float)songCount;
-
-                            if (rowHeight > 20.0f) rowHeight = 20.0f;
-
-                            SetCursorPos(ImVec2(250.0f, 355.0f));
-                            PushStyleColor(ImGuiCol_TableHeaderBg,    ImVec4(0, 0, 0, 0));
-                            PushStyleColor(ImGuiCol_TableBorderLight, ImVec4(0, 0, 0, 0));
-                            PushStyleColor(ImGuiCol_TableBorderStrong,ImVec4(0, 0, 0, 0));
-                            PushStyleColor(ImGuiCol_HeaderHovered,    ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
-                            PushStyleColor(ImGuiCol_HeaderActive,     ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
-                            PushStyleColor(ImGuiCol_ButtonActive,     ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
-
-                            ImGuiTableFlags flags =
-                                ImGuiTableFlags_SizingFixedFit |
-                                ImGuiTableFlags_BordersInnerH  |
-                                ImGuiTableFlags_ScrollY |
-                                ImGuiTableFlags_NoSavedSettings;
-
-                            float tableW = ws.x - 185.0f;
-                            
-                            SetCursorPos(ImVec2(270.0f, 200.0f));
-                            if (BeginTable("SongTable", 5, flags, ImVec2(tableW, availableH + 30.0f)))
-                            {
-                                TableSetupColumn("#",        ImGuiTableColumnFlags_WidthFixed, 40.0f);
-                                TableSetupColumn("Title",    ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 240.0f * sx);
-                                TableSetupColumn("Artist",   ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 200.0f * sx);
-                                TableSetupColumn("Album",    ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 200.0f * sx);
-                                TableSetupColumn("Duration", ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_DefaultHide, 80.0f  * sx);
-
-                                TableSetupScrollFreeze(0, 1);
-                                TableHeadersRow();
-                                TableNextRow(ImGuiTableRowFlags_None, 23.0f);
-
-                                std::string artist, album;
-                                idk12123(foldiername, artist, album);
-
-                                PushFont(MyFont);
-                                for (int i = 0; i < songCount; i++)
-                                {
-                                    const auto& song = songlist[i];
-                                    
-                                    TableNextRow(ImGuiTableRowFlags_None, rowHeight);
-                                    TableSetColumnIndex(0);
-                                    Text("%02d", i + 1);
-                                    TableSetColumnIndex(1);
-                                        
-                                    std::string selID = "##sel" + std::to_string(i);
-                                        
-                                    if (ImGui::Selectable(selID.c_str(), selectedIndex == i, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, rowHeight)))
-                                    {
-                                        selectedIndex = i;
-                                            
-                                        if (!song.path.empty())
-                                        {
-                                            if (playerplay(song.path))
-                                            {
-                                                printf("idk: %s\n", song.title.c_str());
-                                            }
-                                                
-                                            else
-                                            {
-                                                printf("idk1%s\n", song.title.c_str());
-                                            }
-                                        }
-                                    }
-                                        
-                                    SameLine();
-                                    TextUnformatted(song.title.c_str());
-
-                                    TableSetColumnIndex(2);
-                                    TextUnformatted(artist.c_str());
-                                    TableSetColumnIndex(3);
-                                    TextUnformatted(album.c_str());
-
-                                    TableSetColumnIndex(4);
-                                    Text(""); 
-                                }
-
-                                PopStyleColor(6);
-                                PopFont();
-                                EndTable();
-                            }
-                        }
-
-                        else
+                        if (folderTabList.empty())
                         {
                             SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
                             Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
@@ -1133,8 +1045,43 @@ void Gui()
                             Text("Add some songs to your library\n             to get started.");
                             PopStyleColor();
                             PopFont();
+                        
+                            // Here is the end of the else statement (i will add it pretty soon its almost copy pasting my past code) yea it was copy paste
                         }
-                        // Here is the end of the else statement (i will add it pretty soon its almost copy pasting my past code) yea it was copy paste
+                    
+                        else
+                        {   
+                            SetCursorPos(ImVec2(270.0f, 170.0f));
+
+                            PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.20, 0.20, 0.20, 1.0f));
+                            PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.20, 0.20, 0.20, 1.0f));
+                            
+                            if (BeginTable("SongTable", 2,  ImGuiTableFlags_ScrollY, ImVec2(750.0f * scale_x, 390.0f * scale_xy)))
+                            {
+                                TableSetupColumn("Foldier name", ImGuiTableColumnFlags_WidthStretch);
+                                TableSetupColumn("Songs", ImGuiTableColumnFlags_WidthFixed, 80.0f);
+                                TableHeadersRow();
+
+                                for (size_t f = 0; f < folderTabList.size(); f++)
+                                {
+                                    TableNextRow(ImGuiTableRowFlags_None, 24.0f);
+                                    TableSetColumnIndex(0);
+                                        
+                                    std::string label = folderTabList[f].folderName + "##idknononoon" + std::to_string(f);
+                                    if (Selectable(label.c_str(), ActiveFolderViewIndex == (int)f, ImGuiSelectableFlags_SpanAllColumns))
+                                    {
+                                        ActiveFolderViewIndex = (int)f;
+                                        LibraryTabSystem = 2;
+                                    }
+
+                                    TableSetColumnIndex(1);
+                                    Text("%d songs", (int)folderTabList[f].songIndices.size()); 
+                                }
+                                
+                                EndTable();
+                            }
+                            PopStyleColor(2);
+                        }
                     }
 
                     else if (LibraryTabSystem == 1)
@@ -1239,48 +1186,118 @@ void Gui()
                         // Here is the end of the else statement
                     }
 
-                    else if (LibraryTabSystem == 2)
+                    else if (LibraryTabSystem == 2) 
                     {
-                        // Put this to an else statement after i make the find music statement later
-                        SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
-                        Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
+                        ImVec2 windowSize = GetWindowSize();
 
-                        SetCursorPos(ImVec2(675.0f * scale_x, 400.0f * scale_y));
-                        PushFont(NULL, 28.0f); // Next put it 16
-
-                        Text("You haven't selected a folder");
-
-                        PopFont();
-                        
-                        SetCursorPos(ImVec2(680.0f * scale_x, 440.0f * scale_y));
-                        PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
-                        PushFont(NULL, 18.5f);
-
-                        Text("Go to settings and select a folder to start.");
-                        
-                        PopStyleColor();
-                        PopFont();
-
-                        PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
-                        PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
-                        PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
-                        PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
-                        
-                        SetCursorPos(ImVec2(710.0f * scale_xyzx, 470.0f * scale_y));
-
-                        if (Button(" Settings ", ImVec2(70.0f, 50.0f)))
+                        if (ActiveFolderViewIndex != -1)
                         {
-                            Tabsystem = 4;
+                            SetCursorPos(ImVec2(270.0f * scale_x, 170.0f * scale_y));
+                            if (Button("< Go Back", ImVec2(160.0f * scale_x, 25.0f * scale_y)))
+                            {
+                                ActiveFolderViewIndex = -1; 
+                            }
+
+                            if (ActiveFolderViewIndex != -1)
+                            {
+                                const auto& currentFolder = folderTabList[ActiveFolderViewIndex];
+                                
+                                SetCursorPos(ImVec2(270.0f * scale_x, 205.0f * scale_y));
+                                Text("Foldier Content: %s", currentFolder.folderName.c_str());
+
+                                SetCursorPos(ImVec2(270.0f * scale_x, 240.0f * scale_y));
+                                if (BeginTable("##Foliertracktable", 1, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY, ImVec2(750.0f * scale_x, 320.0f * scale_y)))
+                                {
+                                    TableSetupColumn("Song Title", ImGuiTableColumnFlags_WidthStretch);
+                                    TableHeadersRow();
+
+                                    for (size_t k = 0; k < currentFolder.songIndices.size(); k++)
+                                    {
+                                        int globalSongIdx = currentFolder.songIndices[k];
+                                        const auto& track = songlist[globalSongIdx];
+
+                                        TableNextRow(ImGuiTableRowFlags_None, 24.0f * scale_y);
+                                        TableSetColumnIndex(0);
+                                        
+                                        std::string label = track.title + "##fldTrack" + std::to_string(k);
+                                        if (Selectable(label.c_str(), selectedIndex == globalSongIdx, ImGuiSelectableFlags_SpanAllColumns))
+                                        {
+                                            selectedIndex = globalSongIdx;
+                                            playerplay(track.path);
+                                        }
+                                    }
+                                    EndTable();
+                                }
+                            }
                         }
+                        else 
+                        {   
+                            // used llm for the offsets
+                            SetCursorPos(ImVec2(270.0f * scale_x, 170.0f * scale_y));
+                            TextDisabled("All Discovered Music Directories");
 
-                        PopStyleColor(3);
-                        PopStyleVar();
+                            if (folderTabList.empty())
+                            {
+                                SetCursorPos(ImVec2(270.0f * scale_x, 210.0f * scale_y));
+                                TextDisabled("No directories loaded.");
+                            }
+                            else
+                            {   
+                                float cardWidth = 130.0f * scale_x;
+                                float cardHeight = 210.0f * scale_y;
+                                float padding = 25.0f * scale_x;
+                                float startX = 270.0f * scale_x;
+                                float startY = 210.0f * scale_y;
 
-                        // Here is the end of the else statement
+                                float currentX = startX;
+                                float currentY = startY;
+
+                                for (size_t f = 0; f < folderTabList.size(); f++)
+                                {
+                                    SetCursorPos(ImVec2(currentX, currentY));
+                                    
+                                    BeginGroup();
+                                    
+                                    if (folderTabList[f].folderImg != nullptr)
+                                    {
+                                        Image((void*)folderTabList[f].folderImg, ImVec2(cardWidth, cardWidth));
+                                    }
+                                    
+                                    else
+                                    {
+                                        ImDrawList* drawList = GetWindowDrawList();
+                                        ImVec2 pMin = GetCursorScreenPos();
+                                        ImVec2 pMax = ImVec2(pMin.x + cardWidth, pMin.y + cardWidth);
+                                        drawList->AddRectFilled(pMin, pMax, IM_COL32(45, 45, 48, 255), 6.0f);
+                                        std::string placeholderId = "##imgPlaceholder" + std::to_string(f);
+                                        InvisibleButton(placeholderId.c_str(), ImVec2(cardWidth, cardWidth));
+                                    }
+
+                                    PushTextWrapPos(GetCursorPosX() + cardWidth);
+                                    TextUnformatted(folderTabList[f].folderName.c_str());
+                                    TextDisabled("%d Tracks", (int)folderTabList[f].songIndices.size());
+                                    PopTextWrapPos();
+
+                                    EndGroup();
+
+                                    if (IsItemClicked())
+                                    {
+                                        ActiveFolderViewIndex = (int)f;
+                                    }
+
+                                    currentX += cardWidth + padding;
+
+                                    if (currentX + cardWidth > windowSize.x - 5.0f * scale_x)
+                                    {
+                                        currentX = startX;
+                                        currentY += cardHeight + padding;
+                                    }
+                                }
+                            }
                         }
-
+                    }
                 }
-                
+
                 else if (Tabsystem == 2)
                 {
                     SetCursorPos(ImVec2(255.0f, 70.0f));
@@ -1632,14 +1649,38 @@ void Gui()
                 {
                     const bool selecteds = (plalistselectedindex == i);
 
-                    if (Selectable(g_Playlists[i].name.c_str(), selecteds, ImGuiSelectableFlags_None, ImVec2(0, 0)))
+                    std::string labelID = g_Playlists[i].name + "##item" + std::to_string(i);
+
+                    float selectableWidth = newboxw - 28.0f; 
+
+                    if (Selectable(labelID.c_str(), selecteds, ImGuiSelectableFlags_None, ImVec2(selectableWidth, 0.0f)))
                     {
-                        selectedIndex = i;
-
+                        plalistselectedindex = i;
                         Tabsystem = 1;
-
-                        // test it later LibraryTabSystem = 0;
+                        // LibraryTabSystem = 0;
                     }
+                    
+                    SameLine(newboxw - 22.0f);
+
+                    std::string closeID = "##close" + std::to_string(i);
+
+                    PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                    PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.25f, 0.25f, 0.25f, 1.0f));
+                    PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+
+                    if (ImageButton(closeID.c_str(), (ImTextureID)closebutton, ImVec2(16.0f, 16.0f)))
+                    {
+                        g_Playlists.erase(g_Playlists.begin() + i);
+
+                        if (plalistselectedindex >= (int)g_Playlists.size())
+                        {
+                            plalistselectedindex = (int)g_Playlists.size() - 1;
+                        }
+
+                        i--;
+                    }
+                    
+                    PopStyleColor(3);
                 }
                 
                 PopStyleColor(3);
