@@ -20,7 +20,7 @@ A light weight music player using Dear ImGui as a framework DirectX 11, win 32 A
 
 # STILL UNDER DEVELOPMENT
 
-Backend has been offcially fully finished the only thing left is to apply it on the frontend polish the UI and be done with this project
+Backend has been offcially fully finished the only thing left is to apply it on the frontend polish the UI and be done with this project also a website is being developed.
 
 ---
 ## Features
@@ -73,7 +73,6 @@ Currently running at about ~0 CPU utilization and just under 17-16 MB of ram whi
   ninja
 ```
 ---
-
 ## Contributing
 
 > PR Requests are available and I would be very happy to get some help by the community.
