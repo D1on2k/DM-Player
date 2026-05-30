@@ -39,7 +39,7 @@ string uplow(const string& str)
     return result;
 }
 
-string getname (const string& path)
+string getname(const string& path)
 {
     size_t lastSlash = path.find_last_of("/\\");
     string filename = (lastSlash != string::npos) ? path.substr(lastSlash + 1) : path;
@@ -54,10 +54,11 @@ string getname (const string& path)
 
 void scanfiles()
 {
-    if (FoldierPath.empty())
+    songlist.clear();
+
+    if (FoldierPath.empty()) 
     {
-        // clear song list
-        songlist.clear();
+        return;
     }
 
     try
@@ -97,10 +98,92 @@ void scanfiles()
     }
 }
 
+// stack overflow shoutout i found what i needed and i had to do minimal changes to make it work
+void scanfoldiers()
+{
+    folderTabList.clear();
+    songlist.clear();
+
+    if (FoldierPath.empty())
+    {
+        return;
+    }
+
+    try 
+    {
+        path baseDir(FoldierPath);
+        if (!exists(baseDir) || !is_directory(baseDir))
+        {
+            return;
+        }
+        
+        for (const auto& entry : recursive_directory_iterator(baseDir))
+        {
+            if (entry.is_regular_file())
+            {
+                string ext = entry.path().extension().string();
+                bool isAudio = false;
+
+                for (const auto& audioExt : formats)
+                {
+                    if (uplow(ext) == uplow(audioExt))
+                    {
+                        isAudio = true;
+                        break;
+                    }
+                }
+
+                if (isAudio)
+                {
+                    SongDisplay song;
+                    song.path = entry.path().string();
+                    song.title = getname(entry.path().string());
+                    song.artist = "Unknown Artist";
+                    song.album = "Unknown Album";
+
+                    songlist.push_back(song);
+                    int newlyAddedSongIndex = (int)songlist.size() - 1;
+
+                    path parentFolder = entry.path().parent_path();
+                    string parentFolderPathStr = parentFolder.string();
+
+                    bool folderExists = false;
+                    for (size_t f = 0; f < folderTabList.size(); f++)
+                    {
+                        if (folderTabList[f].fullFolderPath == parentFolderPathStr)
+                        {
+                            folderTabList[f].songIndices.push_back(newlyAddedSongIndex);
+                            folderExists = true;
+                            break;
+                        }
+                    }
+
+                    if (!folderExists)
+                    {
+                        FolderDisplay newFolder;
+                        newFolder.folderName = parentFolder.filename().string();
+                        newFolder.fullFolderPath = parentFolderPathStr;
+                        newFolder.songIndices.push_back(newlyAddedSongIndex);
+                        newFolder.folderImg = nullptr;
+
+                        folderTabList.push_back(newFolder);
+                    }
+                }
+            }
+        }
+    }
+    catch (...)
+    {
+
+    }
+}
+
 void ldsngsifneeded() 
 {
     if (songsLoaded || FoldierPath.empty()) return;
     
     scanfiles();
+    scanfoldiers(); // almost forgot it without this we would scna nothing
+
     songsLoaded = true;
 }
