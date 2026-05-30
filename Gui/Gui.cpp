@@ -126,7 +126,7 @@ void Gui()
     // Create window for the application
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"DM Player", WS_POPUP, 100, 100, (int)(1200 * main_scale), (int)(800 * main_scale), nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"DM Player", WS_POPUP | WS_MINIMIZEBOX | WS_VISIBLE, 100, 100, (int)(1200 * main_scale), (int)(800 * main_scale), nullptr, nullptr, wc.hInstance, nullptr);
     MakeTheWindowRound(hwnd, 30); // For GitHub Forkers Higher the radious the window will become more circlular 
 
     // Initialize Direct3D
@@ -210,6 +210,68 @@ void Gui()
         if (done)
             break;
 
+        // make it that was so if the song finishes to play the next
+        // used LLM to debug this statement too when i made my version it just auto crashed when a song had finished
+        if (playerifsongjustfinished())
+        {
+            if (Tabsystem == 2 && plalistselectedindex != -1)
+            {
+                auto& activePlaylist = g_Playlists[plalistselectedindex];
+                if (!activePlaylist.songokok.empty())
+                {
+                    int currentPlaylistPos = -1;
+                    for (size_t i = 0; i < activePlaylist.songokok.size(); i++)
+                    {
+                        if (activePlaylist.songokok[i] == selectedIndex)
+                        {
+                            currentPlaylistPos = (int)i;
+                            break;
+                        }
+                    }
+
+                    if (currentPlaylistPos != -1)
+                    {
+                        int nextPlaylistPos = (currentPlaylistPos + 1) % (int)activePlaylist.songokok.size();
+                        selectedIndex = activePlaylist.songokok[nextPlaylistPos];
+                    }
+                    else
+                    {
+                        selectedIndex = activePlaylist.songokok[0];
+                    }
+
+                    Sleep(60);
+
+                    if (playerplay(songlist[selectedIndex].path))
+                    {
+                        pause = false;
+                    }
+                    else
+                    {
+                        pause = true;
+                    }
+                }
+            }
+                    
+            else
+            {
+                if (!songlist.empty())
+                {
+                    selectedIndex = (selectedIndex + 1) % (int)songlist.size();
+                            
+                    Sleep(60);  
+                            
+                    if (playerplay(songlist[selectedIndex].path))
+                    {
+                        pause = false;
+                    }
+                    else
+                    {
+                        pause = true; 
+                    }
+                }
+            }
+        }
+        
         // Handle window being minimized or screen locked
         if (g_SwapChainOccluded && g_pSwapChain->Present(0, DXGI_PRESENT_TEST) == DXGI_STATUS_OCCLUDED)
         {
@@ -518,28 +580,6 @@ void Gui()
                 {   
                     loopingorno = !loopingorno; // make it change the boolean
                     playerrepeat();
-                }
-
-                // make it that was so if the song finishes to play the next
-                // used LLM to debug this statement too when i made my version it just auto crashed when a song had finished
-                if (playerifsongjustfinished())
-                {
-                    if (!songlist.empty())
-                    {
-                        selectedIndex = (selectedIndex + 1) % (int)songlist.size();
-                        
-                        Sleep(50);  
-                        
-                        if (playerplay(songlist[selectedIndex].path))
-                        {
-                            pause = false;
-                        }
-                        
-                        else
-                        {
-                            selectedIndex = -1;
-                        }
-                    }
                 }
                     
                 float current = 0.0f;
@@ -1051,12 +1091,14 @@ void Gui()
                     
                         else
                         {   
+                            ImVec2 windowSize = GetWindowSize();
+
                             SetCursorPos(ImVec2(270.0f, 170.0f));
 
                             PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.20, 0.20, 0.20, 1.0f));
                             PushStyleColor(ImGuiCol_HeaderActive, ImVec4(0.20, 0.20, 0.20, 1.0f));
                             
-                            if (BeginTable("SongTable", 2,  ImGuiTableFlags_ScrollY, ImVec2(750.0f * scale_x, 390.0f * scale_xy)))
+                            if (BeginTable("SongTable", 2,  ImGuiTableFlags_ScrollY, ImVec2(850.0f * scale_x, 545.0f * scale_y))) // should've putted it 777, no? I had putted it 555 but it was not looking good i made a joke
                             {
                                 TableSetupColumn("Foldier name", ImGuiTableColumnFlags_WidthStretch);
                                 TableSetupColumn("Songs", ImGuiTableColumnFlags_WidthFixed, 80.0f);
@@ -1066,7 +1108,9 @@ void Gui()
                                 {
                                     TableNextRow(ImGuiTableRowFlags_None, 24.0f);
                                     TableSetColumnIndex(0);
-                                        
+                                    
+                                    Separator();
+
                                     std::string label = folderTabList[f].folderName + "##idknononoon" + std::to_string(f);
                                     if (Selectable(label.c_str(), ActiveFolderViewIndex == (int)f, ImGuiSelectableFlags_SpanAllColumns))
                                     {
@@ -1133,7 +1177,7 @@ void Gui()
                             else
                             {   
                                 // Used LLM to help me with the positions since imgui doesnt have an automatic scale engine and my way didnt work also yea i debugged it it did have bugs and i tweaked it 
-                                float startX = 265.0f; 
+                                float startX = 300.0f;  // 265
                                 float startY = 180.0f * scale_y;
                                 
                                 float cardWidth = 140.0f;
@@ -1192,8 +1236,8 @@ void Gui()
 
                         if (ActiveFolderViewIndex != -1)
                         {
-                            SetCursorPos(ImVec2(270.0f * scale_x, 170.0f * scale_y));
-                            if (Button("< Go Back", ImVec2(160.0f * scale_x, 25.0f * scale_y)))
+                            SetCursorPos(ImVec2(270.0f, 170.0f));
+                            if (Button("< Go Back", ImVec2(180.0f, 25.0f)))
                             {
                                 ActiveFolderViewIndex = -1; 
                             }
@@ -1202,12 +1246,12 @@ void Gui()
                             {
                                 const auto& currentFolder = folderTabList[ActiveFolderViewIndex];
                                 
-                                SetCursorPos(ImVec2(270.0f * scale_x, 205.0f * scale_y));
-                                Text("Foldier Content: %s", currentFolder.folderName.c_str());
+                                SetCursorPos(ImVec2(270.0f, 205.0f));
+                                Text("Album name: %s", currentFolder.folderName.c_str());
 
-                                SetCursorPos(ImVec2(270.0f * scale_x, 240.0f * scale_y));
-                                if (BeginTable("##Foliertracktable", 1, ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY, ImVec2(750.0f * scale_x, 320.0f * scale_y)))
-                                {
+                                SetCursorPos(ImVec2(270.0f, 240.0f));
+                                if (BeginTable("##Foliertracktable", 1, ImGuiTableFlags_ScrollY, ImVec2(900.0f * scale_x, 470.0f * scale_y)))
+                                {                  
                                     TableSetupColumn("Song Title", ImGuiTableColumnFlags_WidthStretch);
                                     TableHeadersRow();
 
@@ -1216,82 +1260,193 @@ void Gui()
                                         int globalSongIdx = currentFolder.songIndices[k];
                                         const auto& track = songlist[globalSongIdx];
 
-                                        TableNextRow(ImGuiTableRowFlags_None, 24.0f * scale_y);
+                                        TableNextRow(ImGuiTableRowFlags_None, 12.0f);
                                         TableSetColumnIndex(0);
                                         
-                                        std::string label = track.title + "##fldTrack" + std::to_string(k);
+                                        BeginGroup();
+                                        float currentX = GetCursorPosX();
+                                        
+                                        SetCursorPosX(currentX + 8.0f * scale_x); 
+                                        TextDisabled("%d", (int)(k + 1));
+                                        
+                                        SameLine();
+                                        SetCursorPosX(currentX + 35.0f * scale_x);
+
+                                        std::string cleanTitle = track.title;
+                                        size_t hyphenPos = cleanTitle.find('-');
+                                        if (hyphenPos != std::string::npos && hyphenPos < 5) 
+                                        {
+                                            size_t firstLetterPos = cleanTitle.find_first_not_of("0123456789 ", hyphenPos + 1);
+                                            if (firstLetterPos != std::string::npos)
+                                            {
+                                                cleanTitle = cleanTitle.substr(firstLetterPos);
+                                            }
+                                        }
+
+                                        std::string label = cleanTitle + "##fldTrack" + std::to_string(k);
+                                        std::string popupId = "##trackPopup" + std::to_string(k);
+
                                         if (Selectable(label.c_str(), selectedIndex == globalSongIdx, ImGuiSelectableFlags_SpanAllColumns))
                                         {
                                             selectedIndex = globalSongIdx;
                                             playerplay(track.path);
                                         }
+
+                                        if (IsItemClicked(ImGuiMouseButton_Right))
+                                        {
+                                            OpenPopup(popupId.c_str());
+                                        }
+
+                                        EndGroup();
+                                        
+                                        Dummy(ImVec2(0.0f, 4.0f * scale_y)); 
+                                        Separator(); 
+                                        Dummy(ImVec2(0.0f, 4.0f * scale_y));
+
+                                        PushStyleVar(ImGuiStyleVar_WindowRounding, 6.0f);
+                                        if (BeginPopup(popupId.c_str()))
+                                        {
+                                            if (!g_Playlists.empty())
+                                            {
+                                                if (BeginMenu("Add to Playlist"))
+                                                {
+                                                    for (size_t p = 0; p < g_Playlists.size(); p++)
+                                                    {
+                                                        if (MenuItem(g_Playlists[p].name.c_str()))
+                                                        {
+                                                            auto& vec = g_Playlists[p].songokok;
+                                                            if (std::find(vec.begin(), vec.end(), globalSongIdx) == vec.end())
+                                                            {
+                                                                vec.push_back(globalSongIdx);
+                                                            }
+                                                        }
+                                                    }
+                                                    ImGui::EndMenu();
+                                                }
+                                            }
+                                            else
+                                            {
+                                                TextDisabled("Create a playlist, or you cannot use this feature");
+                                            }
+                                            EndPopup();
+                                        }
+                                        PopStyleVar();
                                     }
                                     EndTable();
                                 }
                             }
                         }
+
                         else 
-                        {   
-                            // used llm for the offsets
-                            SetCursorPos(ImVec2(270.0f * scale_x, 170.0f * scale_y));
-                            TextDisabled("All Discovered Music Directories");
-
+                        {  
                             if (folderTabList.empty())
-                            {
-                                SetCursorPos(ImVec2(270.0f * scale_x, 210.0f * scale_y));
-                                TextDisabled("No directories loaded.");
-                            }
-                            else
                             {   
-                                float cardWidth = 130.0f * scale_x;
-                                float cardHeight = 210.0f * scale_y;
-                                float padding = 25.0f * scale_x;
-                                float startX = 270.0f * scale_x;
-                                float startY = 210.0f * scale_y;
+                                // Big thanks to GitHub it became clutch it provided me with my old good looking code i am still in a confused state with the scale_x,y etc but it preserved my code so i could just copy paste the old polished part
+                                SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
+                                Image((ImTextureID)BigNote, ImVec2(64.0f, 64.0f));
 
-                                float currentX = startX;
-                                float currentY = startY;
+                                SetCursorPos(ImVec2(675.0f * scale_x, 400.0f * scale_y));
+                                PushFont(NULL, 28.0f); // Next put it 16
 
-                                for (size_t f = 0; f < folderTabList.size(); f++)
+                                Text("You haven't selected a folder");
+
+                                PopFont();
+
+                                SetCursorPos(ImVec2(680.0f * scale_x, 440.0f * scale_y));
+                                PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                                PushFont(NULL, 18.5f);
+
+                                Text("Go to settings and select a folder to start.");
+
+                                PopStyleColor();
+                                PopFont();
+
+                                PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                                PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+                                PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+                                PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
+
+                                SetCursorPos(ImVec2(710.0f * scale_xyzx, 470.0f * scale_y));
+
+                                if (Button(" Settings ", ImVec2(70.0f, 50.0f)))
                                 {
-                                    SetCursorPos(ImVec2(currentX, currentY));
-                                    
-                                    BeginGroup();
-                                    
-                                    if (folderTabList[f].folderImg != nullptr)
+                                    Tabsystem = 4;
+                                }
+
+                                PopStyleColor(3);
+                                PopStyleVar();
+                            }
+                            else 
+                            {   
+                                if (folderTabList.empty())
+                                {
+                                    //SetCursorPos(ImVec2(270.0f * scale_x, 210.0f * scale_y));
+                                    //TextDisabled("No directories loaded.");
+                                }
+                                else
+                                {   
+                                    SetCursorPos(ImVec2(270.0f, 170.0f));
+                                    TextDisabled("All Found Music Directories");
+
+                                    SetCursorPos(ImVec2(270.0f, 210.0f));
+
+                                    float childWidth = windowSize.x - (270.0f * scale_x) - (30.0f * scale_x); 
+                                    float childHeight = windowSize.y - (300.0f) - (20.0f); //210
+
+                                    if (BeginChild("##Foldiergrid", ImVec2(childWidth, childHeight), false, ImGuiWindowFlags_NoBackground))
                                     {
-                                        Image((void*)folderTabList[f].folderImg, ImVec2(cardWidth, cardWidth));
+                                        float cardWidth = 130.0f * scale_x;
+                                        float cardHeight = 210.0f * scale_y;
+                                        float padding = 25.0f * scale_x;
+                                        
+                                        float startX = 0.0f;
+                                        float startY = 0.0f;
+
+                                        float currentX = startX;
+                                        float currentY = startY;
+
+                                        for (size_t f = 0; f < folderTabList.size(); f++)
+                                        {
+                                            SetCursorPos(ImVec2(currentX, currentY));
+                                            
+                                            BeginGroup();
+                                            
+                                            if (folderTabList[f].folderImg != nullptr)
+                                            {
+                                                Image((void*)folderTabList[f].folderImg, ImVec2(cardWidth, cardWidth));
+                                            }
+                                            else
+                                            {
+                                                ImDrawList* drawList = GetWindowDrawList();
+                                                ImVec2 pMin = GetCursorScreenPos();
+                                                ImVec2 pMax = ImVec2(pMin.x + cardWidth, pMin.y + cardWidth);
+                                                drawList->AddRectFilled(pMin, pMax, IM_COL32(45, 45, 48, 255), 6.0f);
+                                                std::string placeholderId = "##imgPlaceholder" + std::to_string(f);
+                                                InvisibleButton(placeholderId.c_str(), ImVec2(cardWidth, cardWidth));
+                                            }
+
+                                            PushTextWrapPos(GetCursorPosX() + cardWidth);
+                                            TextUnformatted(folderTabList[f].folderName.c_str());
+                                            TextDisabled("%d Songs", (int)folderTabList[f].songIndices.size());
+                                            PopTextWrapPos();
+
+                                            EndGroup();
+
+                                            if (IsItemClicked())
+                                            {
+                                                ActiveFolderViewIndex = (int)f;
+                                            }
+
+                                            currentX += cardWidth + padding;
+
+                                            if (currentX + cardWidth > childWidth - 20.0f * scale_x)
+                                            {
+                                                currentX = startX;
+                                                currentY += cardHeight + padding;
+                                            }
+                                        }
                                     }
-                                    
-                                    else
-                                    {
-                                        ImDrawList* drawList = GetWindowDrawList();
-                                        ImVec2 pMin = GetCursorScreenPos();
-                                        ImVec2 pMax = ImVec2(pMin.x + cardWidth, pMin.y + cardWidth);
-                                        drawList->AddRectFilled(pMin, pMax, IM_COL32(45, 45, 48, 255), 6.0f);
-                                        std::string placeholderId = "##imgPlaceholder" + std::to_string(f);
-                                        InvisibleButton(placeholderId.c_str(), ImVec2(cardWidth, cardWidth));
-                                    }
-
-                                    PushTextWrapPos(GetCursorPosX() + cardWidth);
-                                    TextUnformatted(folderTabList[f].folderName.c_str());
-                                    TextDisabled("%d Tracks", (int)folderTabList[f].songIndices.size());
-                                    PopTextWrapPos();
-
-                                    EndGroup();
-
-                                    if (IsItemClicked())
-                                    {
-                                        ActiveFolderViewIndex = (int)f;
-                                    }
-
-                                    currentX += cardWidth + padding;
-
-                                    if (currentX + cardWidth > windowSize.x - 5.0f * scale_x)
-                                    {
-                                        currentX = startX;
-                                        currentY += cardHeight + padding;
-                                    }
+                                    EndChild(); 
                                 }
                             }
                         }
@@ -1302,74 +1457,186 @@ void Gui()
                 {
                     SetCursorPos(ImVec2(255.0f, 70.0f));
                     PushFont(NULL, 22.0f);
-
                     Text("Playlists");
-
                     PopFont();
 
-                    GetWindowDrawList()->AddLine(ImVec2(p.x + 260.0f, p.y + -100.0f), ImVec2(p.x + 1820.0f, p.y + -100.0f), // first x is for left right second x is for length first and second y are for rotating
-                    GetColorU32(ImGuiCol_Separator), 1.0f);
+                    GetWindowDrawList()->AddLine(ImVec2(p.x + 260.0f, p.y + -100.0f), ImVec2(p.x + 1820.0f, p.y + -100.0f), GetColorU32(ImGuiCol_Separator), 1.0f);
 
-                    if (g_IsMaximized == false)
-                    {
-                        SetCursorPos(ImVec2(960.0f * scale_x, 120.0f));
+                    if (plalistselectedindex != -1)
+                    {   
+                        ImVec2 windowSize = GetWindowSize();
+
+                        SetCursorPos(ImVec2(270.0f, 120.0f));
+                        if (Button("< Go Back", ImVec2(100.0f * scale_x, 22.0f * scale_y)))
+                        {
+                            plalistselectedindex = -1;
+                        }
+
+                        if (plalistselectedindex != -1)
+                        {
+                            auto& activePlaylist = g_Playlists[plalistselectedindex];
+
+                            SetCursorPos(ImVec2(270.0f , 205.0f * scale_y));
+                            //PushStyleColor(ImGuiCol_TableHeaderBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+                           // PushStyleColor(ImGuiCol_TableRowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+                            //PushStyleColor(ImGuiCol_TableRowBgAlt, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+                            if (BeginTable("##idkwhattoputhere", 1, ImGuiTableFlags_ScrollY, ImVec2(780.0f * scale_x, 420.0f * scale_y)))
+                            {
+                                TableSetupColumn("Song Title",ImGuiTableColumnFlags_WidthStretch); // ImGuiTableFlags_BordersInnerH | 
+                                TableHeadersRow();
+
+                                for (size_t s = 0; s < activePlaylist.songokok.size(); s++)
+                                {
+                                    int songIdx = activePlaylist.songokok[s];
+                                    if (songIdx < 0 || songIdx >= (int)songlist.size()) continue;
+
+                                    const auto& track = songlist[songIdx];
+
+                                    TableNextRow(ImGuiTableRowFlags_None, 28.0f * scale_y);
+                                    TableSetColumnIndex(0);
+
+                                    Dummy(ImVec2(0.0f, -25.0f * scale_y)); 
+                                    Separator(); 
+                                    Dummy(ImVec2(0.0f, 4.0f * scale_y));
+
+                                    std::string label = track.title + "##plSong" + std::to_string(s);
+                                    if (Selectable(label.c_str(), selectedIndex == songIdx, ImGuiSelectableFlags_SpanAllColumns))
+                                    {
+                                        selectedIndex = songIdx;
+                                        playerplay(track.path);
+                                        pause = false;
+                                    }
+                                }
+                                EndTable();
+                            }
+                            //PopStyleColor(3);
+                        } 
                     }
-
+                    
                     else
                     {
-                        SetCursorPos(ImVec2(1018.0f * scale_x, 120.0f));
-                    }
+                        if (g_IsMaximized == false)
+                            SetCursorPos(ImVec2(960.0f * scale_x, 120.0f));
+                        else
+                            SetCursorPos(ImVec2(1018.0f * scale_x, 120.0f));
+
+                        SetNextItemWidth(200.0f);
+                        PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(30.0f, 8.0f));
+                        PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
+                        PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.13f, 0.13f, 0.13f, 1.0f));
                     
-                    SetNextItemWidth(200.0f);
+                        InputTextWithHint("        ", "Search playlist...", HoldSearch, sizeof(HoldSearch));
+                        const char* items[] = {/* Add later the function with the names in order to actually search */};
                     
-                    PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(30.0f, 8.0f));
-                    PushStyleColor(ImGuiCol_Text, ImVec4(0.6, 0.6, 0.6, 1.0f));
-                    PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.13f, 0.13f, 0.13f, 1.0f));
-                   
-                    InputTextWithHint("        ", "Search playlist...", HoldSearch, sizeof(HoldSearch));
-                    const char* items[] = {/* Add later the function with the names in order to actually search */};
-                   
-                    for (const char* item : items) 
-                    {
-                        if (strstr(item, HoldSearch) != nullptr) // Check if we have what the user is searching maybe add later a function with algorithm that can see lowercase and upercase
-                        { 
-                            Text("%s", item); // Very simple logic of finding the item
+                        for (const char* item : items) 
+                        {
+                            if (strstr(item, HoldSearch) != nullptr) // Check if we have what the user is searching maybe add later a function with algorithm that can see lowercase and upercase
+                            { 
+                                Text("%s", item); // Very simple logic of finding the item
+                            }
+                        }
+
+                        PopStyleVar();
+                        PopStyleColor(2);
+
+                        if (g_IsMaximized == false)
+                            SetCursorPos(ImVec2(970.0f, 128.0f));
+                        
+                        else
+                            SetCursorPos(ImVec2(970.0f * scale_xyzx, 128.0f));
+                        Image((ImTextureID)search, ImVec2(16.0f, 16.0f));
+
+                        SetCursorPos(ImVec2(270.0f * scale_x, 170.0f * scale_y));
+
+                        if (g_Playlists.empty())
+                        {
+                            SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
+                            Image((ImTextureID)playlist1, ImVec2(64.0f, 64.0f));
+
+                            SetCursorPos(ImVec2(690.0f * scale_x, 400.0f * scale_y));
+                            PushFont(NULL, 28.0f);
+                            Text("No playlists yet");
+                            PopFont();
+                                
+                            SetCursorPos(ImVec2(680.0f * scale_x, 450.0f * scale_y));
+                            PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
+                            PushFont(NULL, 18.5f);
+                            Text("Create a playlist to get started");
+                            PopStyleColor();
+                            PopFont();
+                        }
+                        
+                        else
+                        {   
+                            // Used LLM for the calculations no way i was doing all this my self too much math but i tweaked it too look nice 
+                            float cardWidth = 160.0f * scale_x;
+                            float cardHeight = 180.0f * scale_y;
+                            float padding = 25.0f * scale_x;
+
+                            float startX = 270.0f * scale_x;
+                            float startY = 100.0f * scale_y;
+                            
+                            float currentX = startX;
+                            float currentY = startY;
+
+                            ImVec2 windowSize = GetWindowSize();
+                            float availableHeight = windowSize.y - startY - 160.0f * scale_y;
+
+                            if (BeginChild("##asdasdadadlakjldaslk", ImVec2(windowSize.x - startX - 40.0f, availableHeight), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_AlwaysVerticalScrollbar))
+                            {
+                                float currentX = 0.0f;
+                                float currentY = 0.0f;
+
+                                for (size_t i = 0; i < g_Playlists.size(); i++)
+                                {
+                                    if (strlen(HoldSearch) > 0 && 
+                                        strstr(g_Playlists[i].name.c_str(), HoldSearch) == nullptr)
+                                        continue;
+
+                                    SetCursorPos(ImVec2(currentX, currentY));
+
+                                    PushStyleColor(ImGuiCol_Button, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+                                    PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.22f, 0.22f, 0.22f, 1.0f));
+                                    PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.12f, 0.12f, 0.12f, 1.0f));
+                                    PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
+
+                                    std::string hiddenBtn = "##playlistcard" + std::to_string(i);
+
+                                    if (Button(hiddenBtn.c_str(), ImVec2(cardWidth, cardHeight)))
+                                    {
+                                        plalistselectedindex = (int)i;
+                                    }
+
+                                    PopStyleVar();
+                                    PopStyleColor(3);
+
+                                    SetCursorPos(ImVec2(currentX + (cardWidth - 60.0f) * 0.5f, currentY + 25.0f));
+                                    Image((ImTextureID)playlist1, ImVec2(60.0f, 60.0f));
+
+                                    ImVec2 textSize = CalcTextSize(g_Playlists[i].name.c_str());
+                                    float textX = currentX + (cardWidth - textSize.x) * 0.5f;
+                                    SetCursorPos(ImVec2(textX, currentY + 100.0f));
+                                    TextUnformatted(g_Playlists[i].name.c_str());
+
+                                    SetCursorPos(ImVec2(currentX + 12.0f, currentY + cardHeight - 35.0f));
+                                    PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
+                                    Text("%d songs", (int)g_Playlists[i].songokok.size());
+                                    PopStyleColor();
+
+                                    currentX += cardWidth + padding;
+
+                                    if (currentX + cardWidth > (windowSize.x - startX - 80.0f))
+                                    {
+                                        currentX = 0.0f;
+                                        currentY += cardHeight + padding + 15.0f;
+                                    }
+                                }
+                            }
+                            EndChild();
+                        
                         }
                     }
-
-                    PopStyleVar();
-                    PopStyleColor(2);
-                    
-                    SetCursorPos(ImVec2(700.0f * scale_xyzx, 320.0f * scale_y));
-                    Image((ImTextureID)playlist1, ImVec2(64.0f, 64.0f));
-
-                    SetCursorPos(ImVec2(700.0f * scale_x, 400.0f * scale_y));
-                    PushFont(NULL, 28.0f);
-
-                    Text("No playlists yet");
-
-                    PopFont();
-                        
-                    SetCursorPos(ImVec2(687.8f * scale_x, 440.0f * scale_y));
-                    PushStyleColor(ImGuiCol_Text, ImVec4(0.56f, 0.56f, 0.56f, 1.0f));
-                    PushFont(NULL, 18.5f);
-
-                    Text("Create a playlist to get started.");
-                        
-                    PopStyleColor();
-                    PopFont();
-
-                    if (g_IsMaximized == false)
-                    {
-                        SetCursorPos(ImVec2(970.0f, 128.0f));
-                    }
-                    
-                    else
-                    {
-                        SetCursorPos(ImVec2(970.0f * scale_xyzx, 128.0f));
-                    }
-
-                    Image((ImTextureID)search, ImVec2(16.0f, 16.0f));
                 }
                 
                 else if (Tabsystem == 3)
@@ -1694,18 +1961,9 @@ void Gui()
             SetCursorPos(ImVec2(230.0f, 38.0f));
 
             ImVec2 pos = GetCursorScreenPos();
-
             ImDrawList* draw_list = GetWindowDrawList();
-
             ImU32 col = GetColorU32(ImGuiCol_Separator);
-
-            draw_list->AddLine(
-                ImVec2(pos.x, pos.y),
-                ImVec2(pos.x, pos.y + GetWindowSize().y - 38.0f),
-                col,
-                1.0f
-            );
-
+            draw_list->AddLine(ImVec2(pos.x, pos.y), ImVec2(pos.x, pos.y + GetWindowSize().y - 38.0f), col, 1.0f);
 
         End();
         
@@ -1809,7 +2067,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         if ((wParam & 0xfff0) == SC_KEYMENU)
             return 0;
         break;
-
+    
     case WM_DESTROY:
         ::PostQuitMessage(0);
         return 0;
@@ -1817,7 +2075,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_NCHITTEST:
     {
         if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-            return true;
+            return 0;
 
         // Getting the mouse possision 
         float mouseX = (float)(short)LOWORD(lParam);
