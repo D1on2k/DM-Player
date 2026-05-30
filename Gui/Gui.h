@@ -85,6 +85,7 @@ extern RECT g_NormalRect;
 extern int Tabsystem;
 extern int LibraryTabSystem;
 extern int selectedIndex;
+extern int ActiveFolderViewIndex;
 
 
 //std::string HoldSearch = "";
@@ -100,6 +101,15 @@ struct SongDisplay
     std::string path;
 };
 
+struct FolderDisplay
+{
+    std::string folderName;
+    std::string fullFolderPath;
+    std::vector<int> songIndices;
+    struct ID3D11ShaderResourceView* folderImg;
+};
+
+extern std::vector<FolderDisplay> folderTabList;
 extern std::vector<SongDisplay> songlist;
 extern std::vector<std::string> songtitles;
 
