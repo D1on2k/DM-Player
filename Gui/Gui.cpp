@@ -210,8 +210,7 @@ void Gui()
         if (done)
             break;
 
-        // make it that was so if the song finishes to play the next
-        // used LLM to debug this statement too when i made my version it just auto crashed when a song had finished
+        // make it that was so if the song finishes to play the next will start btw if i kept it inside the g_swapchain it would just not work 
         if (playerifsongjustfinished())
         {
             if (Tabsystem == 2 && plalistselectedindex != -1)
