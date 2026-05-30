@@ -29,7 +29,9 @@ SOFTWARE.
 #include <fstream>
 #include <string>
 
-extern std::string FoldierPath;
+extern std::wstring FoldierPath;
+std::string WStringToString(const std::wstring& wstr);
+std::string WStringToUTF8(const std::wstring& wstr);
 
 bool SelectMusicFolder();
 void LoadSavedMusicPath();
