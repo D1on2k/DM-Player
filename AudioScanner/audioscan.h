@@ -32,4 +32,5 @@ SOFTWARE.
 #include "Gui/Gui.h"
 
 void scanfiles();
+void scanfoldiers();
 void ldsngsifneeded();
