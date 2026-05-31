@@ -131,3 +131,40 @@ std::string FormatTime(float seconds)
     
     return std::string(buf);
 }
+
+std::vector<std::string> searchinfoldier(const std::string& folderPath)
+{
+    std::vector<std::string> all_found_images;
+    
+    if (folderPath.empty()) return all_found_images;
+    try 
+    {
+        std::filesystem::path targetPath(folderPath);
+
+        if (std::filesystem::exists(targetPath) && std::filesystem::is_directory(targetPath)) 
+        {
+            std::vector<std::string> extensions = { ".png", ".jpg", ".jpeg", ".webp" };
+
+            for (const auto& entry : std::filesystem::directory_iterator(targetPath)) 
+            {
+                if (entry.is_regular_file()) 
+                {
+                    std::string ext = entry.path().extension().string();
+                    for (auto &c : ext) c = std::tolower(c);
+
+                    for (const std::string& v : extensions) 
+                    {
+                        if (ext == v) 
+                        {
+                            all_found_images.push_back(entry.path().string());
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    } 
+    catch (...) {}
+    
+    return all_found_images;
+}
