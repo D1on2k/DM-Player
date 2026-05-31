@@ -107,6 +107,7 @@ struct FolderDisplay
     std::string fullFolderPath;
     std::vector<int> songIndices;
     struct ID3D11ShaderResourceView* folderImg;
+    bool imgSearched = false;
 };
 
 extern std::vector<FolderDisplay> folderTabList;
