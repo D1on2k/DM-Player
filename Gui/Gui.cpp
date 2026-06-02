@@ -464,6 +464,48 @@ void Gui()
 
                 PopFont();
 
+                SetCursorPos(ImVec2(65.0f, 750.0f * scale_y));
+                if (selectedIndex >= 0 && selectedIndex < (int)songlist.size())
+                {
+                    std::string songName = songlist[selectedIndex].title;
+                    float boxWidth = 200.0f;
+                    
+                    PushClipRect(ImVec2(25.0f, 735.0f), ImVec2(25.0f + boxWidth, 765.0f), true);
+                    float nameWidth = CalcTextSize(songName.c_str()).x;
+                    
+                    if (nameWidth > boxWidth)
+                    {
+                        float scrollSpeed = 25.0f; // enought to read but show everything 
+                        float waitTime = 3.0f; // 3 sec seems like the sweep stop for most including me 
+                        float scrollDistance = nameWidth - boxWidth;
+                        float onewayTime = (scrollDistance / scrollSpeed) + waitTime;
+                        float timer = fmod((float)ImGui::GetTime(), onewayTime * 2.0f);
+                        float scrollOffset = 0.0f;
+                        
+                        if (timer < waitTime)
+                            scrollOffset = 0.0f;
+                        
+                        else if (timer < waitTime + onewayTime)
+                            scrollOffset = ImMin((timer - waitTime) * scrollSpeed, scrollDistance);
+                        
+                        else if (timer < waitTime * 2.0f + onewayTime)
+                            scrollOffset = scrollDistance;
+                        
+                        else
+                            scrollOffset = ImMax(scrollDistance - (timer - waitTime * 2.0f - onewayTime) * scrollSpeed, 0.0f);
+                        
+                        SetCursorPos(ImVec2(10.0f - scrollOffset, 750.0f));
+                    }
+                    
+                    TextUnformatted(songName.c_str());
+                    PopClipRect();
+                }
+                
+                else
+                {
+                    TextUnformatted("No song playing");
+                }
+                
                 // note from yesterday this is the float bar i will use tommorow 
                 // sliderfloat("name", &volume, 0.0f, 1.0f);
                 // setvolume(volume)
@@ -581,23 +623,23 @@ void Gui()
                     playerrepeat();
                 }
                     
-                float current = 0.0f;
-                float total = 0.0f;
-                playersongprosomething(current, total);
+                float currentTime = 0.0f;
+                float totalTime = 0.0f;
+                bool isSongPlaying = playersongprosomething(currentTime, totalTime);
 
                 SetCursorPos(ImVec2(300.0f * scale_xy, 750.0f * scale_y));
-                Text("%s", FormatTime(current).c_str());
+                Text("%s", FormatTime(currentTime).c_str());
 
                 SameLine(0.0f, 8.0f);
                     
                 SetNextItemWidth(300.0f);
 
                 // Used LLM to help me here
-                float currentTime = 0.0f;
-                float totalTime = 0.0f;
+                //float currentTime = 0.0f;
+                //float totalTime = 0.0f;
 
                 // call the function so we dont lose time
-                bool isSongPlaying = playersongprosomething(currentTime, totalTime);
+                //bool isSongPlaying = playersongprosomething(currentTime, totalTime);
 
                 if (isSongPlaying || g_playit != nullptr)
                 {
@@ -761,7 +803,7 @@ void Gui()
                         float rowHeight  = availableH / (float)songCount;
 
                         //if (rowHeight < 10.0f) rowHeight = 10.0f; // minimum so text isnt invisible
-                        if (rowHeight > 20.0f) rowHeight = 20.0f; // never taller than this
+                        if (rowHeight > 0.0f) rowHeight = 0.0f; // never taller than this 20
 
                         SetCursorPos(ImVec2(250.0f, 355.0f));
 
@@ -2095,7 +2137,7 @@ bool CreateDeviceD3D(HWND hWnd)
     sd.SampleDesc.Count = 1;
     sd.SampleDesc.Quality = 0;
     sd.Windowed = TRUE;
-    sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 
     UINT createDeviceFlags = 0;
     //createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
@@ -2166,8 +2208,47 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
             return 0;
         }
-        break;
+        
+        if (wParam == VK_MEDIA_NEXT_TRACK)
+        {
+            if (!songlist.empty())
+            {
+                if (selectedIndex < (int)songlist.size())
+                {
+                    selectedIndex++;
+                }
 
+                else
+                {
+                    selectedIndex = 0;
+                }
+
+                playerplay(songlist[selectedIndex].path);
+                pause = false;
+            }
+        }
+        
+        if (wParam == VK_MEDIA_PREV_TRACK)
+        {
+            if (!songlist.empty())
+            {
+                if (selectedIndex < (int)songlist.size())
+                {
+                    selectedIndex--;
+                }
+
+                else
+                {
+                    selectedIndex = 0;
+                }
+
+                playerplay(songlist[selectedIndex].path);
+                pause = false;
+            }
+        }
+        break;
+    
+        
     case WM_SIZE:
         if (wParam == SIZE_MINIMIZED)
             return 0;
