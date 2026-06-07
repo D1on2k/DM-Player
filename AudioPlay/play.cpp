@@ -114,7 +114,7 @@ bool playerplay(const string& filepath)
         return false;
     }
 
-    if (g_playit->isitplaying)
+    if (!g_playit->csongpath.empty())
     {
         ma_device_stop(&g_playit->device);
         ma_device_uninit(&g_playit->device);
@@ -256,7 +256,8 @@ bool playerifsongjustfinished()
         
         ma_device_stop(&g_playit->device);
         ma_device_uninit(&g_playit->device);
-
+        ma_decoder_uninit(&g_playit->decoder);
+        
         return true;
     }
 
