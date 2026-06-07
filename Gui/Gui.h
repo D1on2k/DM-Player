@@ -25,6 +25,7 @@ SOFTWARE.
 #pragma once
 
 #include <windows.h>
+#include <windowsx.h>
 #include <d3d11.h>
 #include <tlhelp32.h>
 #include <string>
