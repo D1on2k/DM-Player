@@ -10,7 +10,7 @@ A lightweight from scratch music player using Dear ImGui, DirectX 11, Windows 32
 
 <br>
 
-[<img src="https://img.shields.io/badge/Download-v1.7-D5006D?style=for-the-badge&logo=github">](https://github.com/D1on2k/DM-Player/releases/tag/Version1.7) <img src="https://img.shields.io/badge/platform-Windows-D5006D?style=for-the-badge"> <img src="https://img.shields.io/github/license/D1on2k/DInjector?style=for-the-badge&color=D5006D"> <img src="https://img.shields.io/badge/C%2B%2B-17-D5006D?style=for-the-badge">
+[<img src="https://img.shields.io/badge/Download-v1.8-D5006D?style=for-the-badge&logo=github">](https://github.com/D1on2k/DM-Player/releases/tag/Version1.8) <img src="https://img.shields.io/badge/platform-Windows-D5006D?style=for-the-badge"> <img src="https://img.shields.io/github/license/D1on2k/DInjector?style=for-the-badge&color=D5006D"> <img src="https://img.shields.io/badge/C%2B%2B-17-D5006D?style=for-the-badge">
 
 </div>
 
@@ -19,21 +19,14 @@ A lightweight from scratch music player using Dear ImGui, DirectX 11, Windows 32
 ---
 ## Features
 
-- Clean UI.
-- Working Tab System.
-- Fully Custom Made Task Bar.
-- Custom Window.
-- Image Searching.
-- Working UI Scaling.
-- 4 / 4 Tabs finished.
-- Theme changing Dark/Light.
+- Fully custom Window.
+- Clean and modern UI.
+- Tab System.
+- Theme changing Dark/Light (has issue that will be fixed soon).
 - Album cover displaying.
-- Can play music.
-- Detect and show album covers.
-- Detect and show songs.
-- Lower or boost volume.
 - Custom volume bar that updates in real time.
-- Change time mid song.
+- Seeking.
+- Keyboard shortcuts.
 
 ---
 ## Usage
@@ -52,11 +45,6 @@ Currently running at about ~0 CPU utilization and just under 17-16 MB of ram whi
 
 ---
 
-## [Screenshot/Demo]
-<img width="1197" height="799" alt="image" src="https://github.com/user-attachments/assets/09ce7465-526f-4587-8fe3-e5bce5be146c" />
-
----
-
 ## Building
 ```bash
   git clone https://github.com/D1on2k/DM-Player.git
@@ -71,5 +59,15 @@ Currently running at about ~0 CPU utilization and just under 17-16 MB of ram whi
 
 > PR Requests are available and I would be very happy to get some help by the community.
 
+---
+
+## [Screenshot/Demo]
+<img width="1187" height="793" alt="image" src="https://github.com/user-attachments/assets/962e01d2-7500-4f08-bcf8-aaacad41b19a" />
+<img width="1193" height="796" alt="image" src="https://github.com/user-attachments/assets/4ea7884d-c89d-469e-9a95-52e6bf647a72" />
+<img width="1193" height="788" alt="image" src="https://github.com/user-attachments/assets/7c6db8f8-21ef-4ead-821d-f8c793d660b7" />
+<img width="1196" height="794" alt="image" src="https://github.com/user-attachments/assets/32f78e36-4da3-4aab-9b97-42c290722cb9" />
+<img width="1190" height="796" alt="image" src="https://github.com/user-attachments/assets/6ea8dc81-8f96-49c1-8333-dd3d9164a662" />
+
+---
 ## BIG THANKS TO:
 Freepik Hirschwolf JessiGue Ranah Becris Pixel Studio Those Icons Kiranshastry Catalin Fertu juicy_fish Bharat Icons Debi Alpa Nugraha meaicon WR Graphic Garage and Gabriele Malaspina from www.flaticon.com the icons were made by them.
