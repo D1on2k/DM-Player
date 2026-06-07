@@ -43,6 +43,16 @@ A lightweight from scratch music player using Dear ImGui, DirectX 11, Windows 32
 Currently running at about ~0 CPU utilization and just under 17-16 MB of ram while idle. While playing a song it's at ~0% CPU (if minimized) and ~17 MB of ram (depending on how many songs and image format).
 <img width="635" height="28" alt="image" src="https://github.com/user-attachments/assets/240660f5-afd6-4f55-a10a-b46d73874a3a" />
 
+---
+
+<details>
+<summary>[Screenshot/Demo]</summary>
+  <img width="1187" height="793" alt="image" src="https://github.com/user-attachments/assets/962e01d2-7500-4f08-bcf8-aaacad41b19a" />
+  <img width="1193" height="796" alt="image" src="https://github.com/user-attachments/assets/4ea7884d-c89d-469e-9a95-52e6bf647a72" />
+  <img width="1193" height="788" alt="image" src="https://github.com/user-attachments/assets/7c6db8f8-21ef-4ead-821d-f8c793d660b7" />
+  <img width="1196" height="794" alt="image" src="https://github.com/user-attachments/assets/32f78e36-4da3-4aab-9b97-42c290722cb9" />
+  <img width="1190" height="796" alt="image" src="https://github.com/user-attachments/assets/6ea8dc81-8f96-49c1-8333-dd3d9164a662" />
+</details>
 
 ---
 
@@ -62,13 +72,5 @@ Currently running at about ~0 CPU utilization and just under 17-16 MB of ram whi
 
 ---
 
-## [Screenshot/Demo]
-<img width="1187" height="793" alt="image" src="https://github.com/user-attachments/assets/962e01d2-7500-4f08-bcf8-aaacad41b19a" />
-<img width="1193" height="796" alt="image" src="https://github.com/user-attachments/assets/4ea7884d-c89d-469e-9a95-52e6bf647a72" />
-<img width="1193" height="788" alt="image" src="https://github.com/user-attachments/assets/7c6db8f8-21ef-4ead-821d-f8c793d660b7" />
-<img width="1196" height="794" alt="image" src="https://github.com/user-attachments/assets/32f78e36-4da3-4aab-9b97-42c290722cb9" />
-<img width="1190" height="796" alt="image" src="https://github.com/user-attachments/assets/6ea8dc81-8f96-49c1-8333-dd3d9164a662" />
-
----
 ## BIG THANKS TO:
 Freepik Hirschwolf JessiGue Ranah Becris Pixel Studio Those Icons Kiranshastry Catalin Fertu juicy_fish Bharat Icons Debi Alpa Nugraha meaicon WR Graphic Garage and Gabriele Malaspina from www.flaticon.com the icons were made by them.
