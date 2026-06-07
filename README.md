@@ -25,6 +25,7 @@ A lightweight from scratch music player using Dear ImGui, DirectX 11, Windows 32
 - Theme changing Dark/Light (has issue that will be fixed soon).
 - Album cover displaying.
 - Custom volume bar that updates in real time.
+- Playlists and Favourites.
 - Seeking.
 - Keyboard shortcuts.
 
