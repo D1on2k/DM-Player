@@ -27,8 +27,10 @@ SOFTWARE.
 #include <filesystem>
 #include <vector>
 #include <algorithm>
+#include <fstream>
 #include "searching.h"
 #include "PathTab4/select_path.h"
+#include "ImageFetch/Fetch.h"
 
 using namespace std;
 using namespace filesystem;
@@ -71,6 +73,8 @@ void findimages()
 
     vector<string> extensions = { ".png", ".jpg", ".jpeg", ".webp" };
 
+    bool imageFound = false;
+
     // Check if a image exists 
     try 
     {
@@ -81,8 +85,6 @@ void findimages()
                 if (entry.is_regular_file()) 
                 {
                     string ext = entry.path().extension().string();
-                    
-                    // Make it lower case so it doesnt skip jpg
                     for (auto &c : ext) c = tolower(c);
 
                     for (const string& v : extensions) 
@@ -91,10 +93,16 @@ void findimages()
                         {
                             takepath = entry.path().string();
                             searchfortitle = entry.path().stem().string();
+                            imageFound = true;
                             return; 
                         }
                     }
                 }
+            }
+
+            if (!imageFound)
+            {
+                DownImage(searchpathformusic);
             }
         }
     } 
@@ -103,6 +111,7 @@ void findimages()
 
     }
 }
+
 
 bool idk12123(const std::string& folderName, std::string& artist, std::string& album) 
 {
@@ -167,4 +176,66 @@ std::vector<std::string> searchinfoldier(const std::string& folderPath)
     catch (...) {}
     
     return all_found_images;
+}
+
+bool DownImage(const std::string& folderPath)
+{
+    if (folderPath.empty()) 
+    {
+        return false;
+    }
+
+    try
+    {
+        std::filesystem::path dir(folderPath);
+
+        // Check if a .txt file exists
+        for (const auto& entry : std::filesystem::directory_iterator(dir))
+        {
+            if (entry.is_regular_file())
+            {
+                std::string ext = entry.path().extension().string();
+                for (auto& c : ext) c = std::tolower(c);
+
+                if (ext == ".txt")
+                {
+                    std::ifstream txtFile(entry.path(), std::ios::binary);
+                    if (!txtFile.is_open()) continue;
+
+                    std::string content((std::istreambuf_iterator<char>(txtFile)), std::istreambuf_iterator<char>());
+
+                    if (content.size() >= 3 && (unsigned char)content[0] == 0xEF && (unsigned char)content[1] == 0xBB && (unsigned char)content[2] == 0xBF)
+                    {
+                        content = content.substr(3);
+                    }
+
+                    // Find any http or https URL anywhere in the file
+                    size_t pos = content.find("http");
+                    while (pos != std::string::npos)
+                    {
+                        size_t end = content.find_first_of(" \t\r\n\"'", pos);
+                        if (end == std::string::npos) end = content.size();
+
+                        std::string url = content.substr(pos, end - pos);
+
+                        // I know it wont show bc of the Gui but its good practice
+                        std::cout << "Found image link in .txt file: " << url << std::endl;
+
+                        if (DownloadImg(url, folderPath))
+                        {
+                            takepath = (dir / "Cover.jpg").string();
+                            searchfortitle = "Cover";
+                            return true;
+                        }
+
+                        pos = content.find("http", end);
+                    }
+                }
+            }
+        }
+    }
+    catch (...) 
+    {
+    }
+    return false;
 }
