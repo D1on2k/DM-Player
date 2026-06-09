@@ -166,6 +166,8 @@ void scanfoldiers()
                         newFolder.songIndices.push_back(newlyAddedSongIndex);
                         newFolder.folderImg = nullptr;
 
+                        DownImage(parentFolderPathStr);
+
                         folderTabList.push_back(newFolder);
                     }
                 }
