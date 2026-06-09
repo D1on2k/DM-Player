@@ -30,6 +30,7 @@ SOFTWARE.
 #include <vector>
 #include <cctype>
 #include "Gui/Gui.h"
+#include "Searching/searching.h"
 
 void scanfiles();
 void scanfoldiers();
