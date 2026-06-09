@@ -39,5 +39,6 @@ extern std::string foldiername;
 
 void findimages();
 bool idk12123(const std::string& folderName, std::string& artist, std::string& album);
+bool DownImage(const std::string& folderPath);
 std::string FormatTime(float seconds);
 std::vector<std::string> searchinfoldier(const std::string& folderPath);
