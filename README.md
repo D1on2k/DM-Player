@@ -10,7 +10,7 @@ A lightweight from scratch music player using Dear ImGui, DirectX 11, Windows 32
 
 <br>
 
-[<img src="https://img.shields.io/badge/Download-v1.8-D5006D?style=for-the-badge&logo=github">](https://github.com/D1on2k/DM-Player/releases/tag/Version1.8) <img src="https://img.shields.io/badge/platform-Windows-D5006D?style=for-the-badge"> <img src="https://img.shields.io/github/license/D1on2k/DInjector?style=for-the-badge&color=D5006D"> <img src="https://img.shields.io/badge/C%2B%2B-17-D5006D?style=for-the-badge">
+[<img src="https://img.shields.io/badge/Download-v1.9-D5006D?style=for-the-badge&logo=github">](https://github.com/D1on2k/DM-Player/releases/tag/Version1.9) <img src="https://img.shields.io/badge/platform-Windows-D5006D?style=for-the-badge"> <img src="https://img.shields.io/github/license/D1on2k/DInjector?style=for-the-badge&color=D5006D"> <img src="https://img.shields.io/badge/C%2B%2B-17-D5006D?style=for-the-badge">
 
 </div>
 
